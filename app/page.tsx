@@ -1,3 +1,4 @@
+// @ts-check
 'use client'
 import React, { useState, useEffect } from 'react';
 import { MdOutlineLightMode } from "react-icons/md";
