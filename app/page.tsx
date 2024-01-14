@@ -1,4 +1,3 @@
-// @ts-check
 'use client'
 import React, { useState, useEffect } from 'react';
 import { MdOutlineLightMode } from "react-icons/md";
@@ -8,7 +7,7 @@ import { ShyftSdk, Network } from '@shyft-to/js';
 // Ad4CgpXJnyFAfamceJdr4sB6H7DSQpqfsRGasKNYJf6H
 // DwFoTKCevYoga35cEe75dseG5dbxwZd7dvZrmhKhSrDD
 
-const shyft = new ShyftSdk({ apiKey: 'q4uEPvIuyvnxwm2U', network: Network.Mainnet });
+// const shyft = new ShyftSdk({ apiKey: 'q4uEPvIuyvnxwm2U', network: Network.Mainnet });
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
