@@ -1,14 +1,15 @@
-// @ts-check
 'use client'
 import React, { useState, useEffect } from 'react';
 import { MdOutlineLightMode } from "react-icons/md";
 import { MdOutlineDarkMode } from "react-icons/md";
 import { ShyftSdk, Network } from '@shyft-to/js';
+import ReactLoading from 'react-loading';
 
 // Ad4CgpXJnyFAfamceJdr4sB6H7DSQpqfsRGasKNYJf6H
 // DwFoTKCevYoga35cEe75dseG5dbxwZd7dvZrmhKhSrDD
+// HJzP21jaRzCA6RhYKRBEFsMkwyWb2Ly1xJ1HKZJkPZGq
 
-// const shyft = new ShyftSdk({ apiKey: 'q4uEPvIuyvnxwm2U', network: Network.Mainnet });
+const shyft = new ShyftSdk({ apiKey: 'q4uEPvIuyvnxwm2U', network: Network.Mainnet });
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -53,8 +54,8 @@ export default function Home() {
 
       setBalance(solBalance);
       setTokenBalances(tokenBalancesResult);
+      console.log("Tokens", tokenBalancesResult);
       setNftList(Array.isArray(nftList) ? nftList : [nftList]);
-      console.log("NFTs", nftList);
     } catch (error) {
       console.error('Error fetching balances:', error);
     } finally {
@@ -70,24 +71,25 @@ export default function Home() {
   
     const groupedNFTs: Record<string, any[]> = {};
   
-    // Group NFTs by their symbol (collection)
+    // Group NFTs by their collection name or symbol
     nftList.forEach((nft) => {
-      const symbol = nft.symbol;
-      if (!groupedNFTs[symbol]) {
-        groupedNFTs[symbol] = [];
+      const collectionName = nft.collection.name || nft.symbol;
+      if (!groupedNFTs[collectionName]) {
+        groupedNFTs[collectionName] = [];
       }
-      groupedNFTs[symbol].push(nft);
+      groupedNFTs[collectionName].push(nft);
     });
   
     // Convert the grouped data into an array for rendering
-    const result = Object.keys(groupedNFTs).map((symbol) => ({
-      symbol,
-      nfts: groupedNFTs[symbol],
+    const result = Object.keys(groupedNFTs).map((collectionName) => ({
+      collectionName,
+      nfts: groupedNFTs[collectionName],
     }));
   
     return result;
-  }  
-
+  }
+  
+  
   useEffect(() => {
     if (buttonClicked) {
       handleAddWallet();
@@ -117,21 +119,22 @@ export default function Home() {
 
       <div className='flex flex-col items-start w-9/12'>
         <div className='mb-10 dark:text-white'>
-          <h2 className='text-2xl font-medium mb-4'>SOL balance: </h2>
-          {isLoading && balance === null && 'Loading SOL balance...'}
-          {balance !== null && !isLoading ? `${balance.toFixed(5)} SOL` : null}
+        <h2 className='text-2xl font-medium mb-4'>SOL balance: </h2>
+          {buttonClicked && <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />}
+          {balance !== null && !buttonClicked ? `${balance.toFixed(5)} SOL` : null}
         </div>
 
         <div className='mb-10 dark:text-white'>
           <h2 className='text-2xl font-medium mb-4'>Tokens:</h2>
           {buttonClicked && isLoading ? (
-            'Loading token balances...'
+             <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
           ) : (
-            <ul className=''>
+            <ul className='flex flex-col gap-5'>
               {tokenBalances && tokenBalances
                 .filter((token) => token.balance !== 0)
                 .map((token, index) => (
-                  <li key={index}>
+                  <li key={index} className='flex flex-row gap-3'>
+                    <img src={token.info.image} alt={token.name} className='w-8 rounded-full mb-3' />
                     {token.info.symbol}: {token.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </li>
                 ))}
@@ -142,12 +145,12 @@ export default function Home() {
         <div className={`dark:text-white max-w-screen-lg items-start`}>
           <h2 className='text-2xl font-medium mb-4'>NFTs:</h2>
           {buttonClicked && isLoading ? (
-            'Loading NFTs...'
+            <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
           ) : (
-            <ul className='flex flex-wrap gap-8 justify-start'>
+            <ul className='flex flex-wrap flex-col gap-8 justify-start'>
               {nftList && groupNFTsByCollection(nftList).map((group, index) => (
                 <li key={index} className='mb-8'>
-                  <h3 className='text-xl font-bold mb-3'>{group.symbol}</h3>
+                  <h3 className='text-xl font-bold mb-3'>{group.collectionName}</h3>
                   <ul className='flex gap-5 flex-wrap'>
                     {/* Display NFTs under each collection */}
                     {group.nfts.map((nft: any, nftIndex: number) => (
