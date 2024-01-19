@@ -4,12 +4,13 @@ import { MdOutlineLightMode } from "react-icons/md";
 import { MdOutlineDarkMode } from "react-icons/md";
 import { ShyftSdk, Network } from '@shyft-to/js';
 import ReactLoading from 'react-loading';
+import NftModal from './nftModal';
 
 // Ad4CgpXJnyFAfamceJdr4sB6H7DSQpqfsRGasKNYJf6H
 // DwFoTKCevYoga35cEe75dseG5dbxwZd7dvZrmhKhSrDD
 // HJzP21jaRzCA6RhYKRBEFsMkwyWb2Ly1xJ1HKZJkPZGq
 
-const shyft = new ShyftSdk({ apiKey: 'q4uEPvIuyvnxwm2U', network: Network.Mainnet });
+// const shyft = new ShyftSdk({ apiKey: 'q4uEPvIuyvnxwm2U', network: Network.Mainnet });
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -19,6 +20,9 @@ export default function Home() {
   const [nftList, setNftList] = useState<any[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [buttonClicked, setButtonClicked] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalImageUrl, setModalImageUrl] = useState('');
+  const [nftAttributes, setNftAttributes] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     document.body.className = isDarkMode ? 'dark' : '';
@@ -30,6 +34,17 @@ export default function Home() {
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setWalletAddress(event.target.value);
+  };
+
+  const openModal = (imageUrl: string, attributes: { [key: string]: string }) => {
+    setModalImageUrl(imageUrl);
+    setNftAttributes(attributes);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalImageUrl('');
+    setIsModalOpen(false);
   };
 
   const handleAddWallet = async () => {
@@ -54,7 +69,7 @@ export default function Home() {
 
       setBalance(solBalance);
       setTokenBalances(tokenBalancesResult);
-      console.log("Tokens", tokenBalancesResult);
+      console.log("Tokens", nftList);
       setNftList(Array.isArray(nftList) ? nftList : [nftList]);
     } catch (error) {
       console.error('Error fetching balances:', error);
@@ -117,6 +132,7 @@ export default function Home() {
         </button>
       </div>
 
+        {/* SOL BALANCE */}
       <div className='flex flex-col items-start w-9/12'>
         <div className='mb-10 dark:text-white'>
         <h2 className='text-2xl font-medium mb-4'>SOL balance: </h2>
@@ -124,6 +140,7 @@ export default function Home() {
           {balance !== null && !buttonClicked ? `${balance.toFixed(5)} SOL` : null}
         </div>
 
+        {/* TOKENS BALANCE */}
         <div className='mb-10 dark:text-white'>
           <h2 className='text-2xl font-medium mb-4'>Tokens:</h2>
           {buttonClicked && isLoading ? (
@@ -135,13 +152,15 @@ export default function Home() {
                 .map((token, index) => (
                   <li key={index} className='flex flex-row gap-3'>
                     <img src={token.info.image} alt={token.name} className='w-8 rounded-full mb-3' />
-                    {token.info.symbol}: {token.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    <span className='text'>{token.balance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                    <span className='text-gray-700 dark:text-gray-400'>{token.info.symbol}</span>
                   </li>
                 ))}
             </ul>
           )}
         </div>
 
+        {/* NFTs BALANCE */}
         <div className={`dark:text-white max-w-screen-lg items-start`}>
           <h2 className='text-2xl font-medium mb-4'>NFTs:</h2>
           {buttonClicked && isLoading ? (
@@ -156,9 +175,14 @@ export default function Home() {
                     {group.nfts.map((nft: any, nftIndex: number) => (
                       <li key={nftIndex} className="flex flex-col items-center mb-4">
                         {nft.cached_image_uri && (
-                          <img src={nft.cached_image_uri} alt={nft.name} className='w-40 mb-3' />
+                          <img
+                            src={nft.cached_image_uri}
+                            alt={nft.name}
+                            className='w-40 mb-3 cursor-pointer hover:opacity-75'
+                            onClick={() => openModal(nft.cached_image_uri, nft.attributes)}
+                          />
                         )}
-                        <h4 className='text-sm'>{nft.name}</h4>
+                        <h4 className='text-sm text-gray-700 dark:text-gray-400'>{nft.name}</h4>
                       </li>
                     ))}
                   </ul>
@@ -169,6 +193,10 @@ export default function Home() {
         </div>
 
       </div>
+      {/* Render the modal if it's open */}
+      {isModalOpen && (
+        <NftModal imageUrl={modalImageUrl} onClose={() => setIsModalOpen(false)} nftAttributes={nftAttributes} />
+      )}
     </div>
   );
 }
