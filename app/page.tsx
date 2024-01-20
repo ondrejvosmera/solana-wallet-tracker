@@ -9,8 +9,9 @@ import NftModal from './nftModal';
 // Ad4CgpXJnyFAfamceJdr4sB6H7DSQpqfsRGasKNYJf6H
 // DwFoTKCevYoga35cEe75dseG5dbxwZd7dvZrmhKhSrDD
 // HJzP21jaRzCA6RhYKRBEFsMkwyWb2Ly1xJ1HKZJkPZGq
+// 86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdaMpo2MMY (toly's wallet)
 
-// const shyft = new ShyftSdk({ apiKey: 'q4uEPvIuyvnxwm2U', network: Network.Mainnet });
+const shyft = new ShyftSdk({ apiKey: 'q4uEPvIuyvnxwm2U', network: Network.Mainnet });
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -23,6 +24,7 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageUrl, setModalImageUrl] = useState('');
   const [nftAttributes, setNftAttributes] = useState<{ [key: string]: string }>({});
+  const [nftName, setNftName] = useState<string>('');
 
   useEffect(() => {
     document.body.className = isDarkMode ? 'dark' : '';
@@ -36,9 +38,10 @@ export default function Home() {
     setWalletAddress(event.target.value);
   };
 
-  const openModal = (imageUrl: string, attributes: { [key: string]: string }) => {
+  const openModal = (imageUrl: string, nftAttributes: { [key: string]: string }, nftName: string) => {
     setModalImageUrl(imageUrl);
-    setNftAttributes(attributes);
+    setNftAttributes(nftAttributes);
+    setNftName(nftName);
     setIsModalOpen(true);
   };
 
@@ -69,7 +72,7 @@ export default function Home() {
 
       setBalance(solBalance);
       setTokenBalances(tokenBalancesResult);
-      console.log("Tokens", nftList);
+      console.log("NFTs", nftList);
       setNftList(Array.isArray(nftList) ? nftList : [nftList]);
     } catch (error) {
       console.error('Error fetching balances:', error);
@@ -179,7 +182,7 @@ export default function Home() {
                             src={nft.cached_image_uri}
                             alt={nft.name}
                             className='w-40 mb-3 cursor-pointer hover:opacity-75'
-                            onClick={() => openModal(nft.cached_image_uri, nft.attributes)}
+                            onClick={() => openModal(nft.cached_image_uri, nft.attributes, nft.name)}
                           />
                         )}
                         <h4 className='text-sm text-gray-700 dark:text-gray-400'>{nft.name}</h4>
@@ -195,7 +198,7 @@ export default function Home() {
       </div>
       {/* Render the modal if it's open */}
       {isModalOpen && (
-        <NftModal imageUrl={modalImageUrl} onClose={() => setIsModalOpen(false)} nftAttributes={nftAttributes} />
+        <NftModal imageUrl={modalImageUrl} nftName={nftName} onClose={() => setIsModalOpen(false)} nftAttributes={nftAttributes} />
       )}
     </div>
   );
