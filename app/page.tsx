@@ -25,6 +25,7 @@ export default function Home() {
   const [modalImageUrl, setModalImageUrl] = useState('');
   const [nftAttributes, setNftAttributes] = useState<{ [key: string]: string }>({});
   const [nftName, setNftName] = useState<string>('');
+  const [solPrice, setSolPrice] = useState<number | null>(null);
 
   useEffect(() => {
     document.body.className = isDarkMode ? 'dark' : '';
@@ -49,6 +50,31 @@ export default function Home() {
     setModalImageUrl('');
     setIsModalOpen(false);
   };
+
+
+    // Function to fetch SOL price
+    const fetchSolPrice = async () => {
+      try {
+        const solResponse = await fetch('https://price.jup.ag/v4/price?ids=SOL');
+        const solData = await solResponse.json();
+        console.log("sol response", solData);
+
+        if (solData && solData.data && solData.data.SOL && solData.data.SOL.price) {
+          setSolPrice(solData.data.SOL.price);
+        } else {
+          console.error("Error getting SOL price:", solData);
+          // Handle the error, you can set a default value for solPrice or display an error message
+        }
+      } catch (error) {
+        console.error('Error fetching SOL price:', error);
+      }
+    };
+
+    // Use useEffect to fetch SOL price on component mount
+    useEffect(() => {
+      fetchSolPrice();
+    }, []);
+
 
   const handleAddWallet = async () => {
     setButtonClicked(true);
@@ -117,6 +143,16 @@ export default function Home() {
   return (
     <div className={`dark:bg-black dark:bg-opacity-95 flex flex-col flex-wrap items-center min-h-screen min-w-max pt-28 pb-20 duration-500 ${isDarkMode ? 'dark' : ''}`}>
       <div className="flex justify-between w-full p-4">
+
+      <div className='flex flex-row gap-2 absolute top-0 left-0 m-5 dark:text-white'>
+        <h2 className='text-2xlfont-medium mb-4'>SOL Price:</h2>
+        {solPrice !== null ? (
+          <span>${solPrice.toFixed(2)}</span>
+        ) : (
+          <span>Loading...</span>
+        )}
+      </div>
+
         <button onClick={toggleDarkMode} className='absolute top-0 right-0 m-5 bg-gray-200 p-3 rounded-full hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-900 duration-200'>
           {isDarkMode ? <MdOutlineLightMode className='text-white' /> : <MdOutlineDarkMode />}
         </button>
