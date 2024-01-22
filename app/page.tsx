@@ -5,6 +5,8 @@ import { MdOutlineDarkMode } from "react-icons/md";
 import { ShyftSdk, Network } from '@shyft-to/js';
 import ReactLoading from 'react-loading';
 import NftModal from './nftModal';
+import Image from 'next/image';
+import solanaLogo from './solana-logo.png';
 
 // Ad4CgpXJnyFAfamceJdr4sB6H7DSQpqfsRGasKNYJf6H
 // DwFoTKCevYoga35cEe75dseG5dbxwZd7dvZrmhKhSrDD
@@ -26,6 +28,8 @@ export default function Home() {
   const [nftAttributes, setNftAttributes] = useState<{ [key: string]: string }>({});
   const [nftName, setNftName] = useState<string>('');
   const [solPrice, setSolPrice] = useState<number | null>(null);
+  const [solBalanceInUsdc, setSolBalanceInUsdc] = useState<number | null>(null);
+  const [usdcPrices, setUsdcPrices] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
     document.body.className = isDarkMode ? 'dark' : '';
@@ -57,7 +61,6 @@ export default function Home() {
       try {
         const solResponse = await fetch('https://price.jup.ag/v4/price?ids=SOL');
         const solData = await solResponse.json();
-        console.log("sol response", solData);
 
         if (solData && solData.data && solData.data.SOL && solData.data.SOL.price) {
           setSolPrice(solData.data.SOL.price);
@@ -86,8 +89,22 @@ export default function Home() {
         wallet: walletAddress,
       });
 
+      // Fetch SOL price in USD
+      const solPriceResponse = await fetch('https://price.jup.ag/v4/price?ids=SOL');
+      const solPriceData = await solPriceResponse.json();
+
+      if (solPriceData && solPriceData.data && solPriceData.data.SOL && solPriceData.data.SOL.price) {
+        setSolPrice(solPriceData.data.SOL.price);
+
+        // Calculate SOL balance in USDC
+        const solBalanceInUsdcValue = solBalance * solPriceData.data.SOL.price;
+        setSolBalanceInUsdc(solBalanceInUsdcValue);
+      } else {
+        console.error("Error getting SOL price:", solPriceData);
+      }
+
       // Fetch token balances
-      const tokenBalancesResult = await shyft.wallet.getAllTokenBalance({
+      const tokenBalances = await shyft.wallet.getAllTokenBalance({
         wallet: walletAddress,
       });
 
@@ -97,8 +114,29 @@ export default function Home() {
       });
 
       setBalance(solBalance);
-      setTokenBalances(tokenBalancesResult);
-      console.log("NFTs", nftList);
+      setTokenBalances(tokenBalances);
+
+      // Fetch USDC prices for each token
+      const usdcPricesData: { [key: string]: number } = {};
+      for (const token of tokenBalances) {
+        const usdcPriceResponse = await fetch(`https://price.jup.ag/v4/price?ids=${token.address}&vsToken=USDC`);
+        const usdcPriceData = await usdcPriceResponse.json();
+
+        console.log(`Response data for ${token.address}:`, usdcPriceData); // Log the response data
+
+        if (
+          usdcPriceData &&
+          usdcPriceData.data &&
+          usdcPriceData.data[token.address] &&
+          usdcPriceData.data[token.address].price !== undefined
+        ) {
+          usdcPricesData[token.address] = usdcPriceData.data[token.address].price;
+        } else {
+          console.error(`Error getting USDC price for ${token.address}:`, usdcPriceData);
+        }
+      }
+
+      setUsdcPrices(usdcPricesData);
       setNftList(Array.isArray(nftList) ? nftList : [nftList]);
     } catch (error) {
       console.error('Error fetching balances:', error);
@@ -133,19 +171,19 @@ export default function Home() {
     return result;
   }
   
-  
   useEffect(() => {
     if (buttonClicked) {
       handleAddWallet();
     }
   }, [buttonClicked]);
 
+
   return (
     <div className={`dark:bg-black dark:bg-opacity-95 flex flex-col flex-wrap items-center min-h-screen min-w-max pt-28 pb-20 duration-500 ${isDarkMode ? 'dark' : ''}`}>
       <div className="flex justify-between w-full p-4">
 
       <div className='flex flex-row gap-2 absolute top-0 left-0 m-5 dark:text-white'>
-        <h2 className='text-2xlfont-medium mb-4'>SOL Price:</h2>
+        <h2 className='text-2xlfont-medium mb-4'>SOL price:</h2>
         {solPrice !== null ? (
           <span>${solPrice.toFixed(2)}</span>
         ) : (
@@ -172,27 +210,57 @@ export default function Home() {
       </div>
 
         {/* SOL BALANCE */}
-      <div className='flex flex-col items-start w-9/12'>
-        <div className='mb-10 dark:text-white'>
-        <h2 className='text-2xl font-medium mb-4'>SOL balance: </h2>
-          {buttonClicked && <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />}
-          {balance !== null && !buttonClicked ? `${balance.toFixed(5)} SOL` : null}
-        </div>
+        <div className='flex flex-col items-start w-9/12'>
+          <div className='mb-10 dark:text-white'>
+            <h2 className='text-2xl font-medium mb-4'>SOL balance: </h2>
+            {buttonClicked && <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />}
+            {balance !== null && !buttonClicked ? (
+            <div className='flex flex-row items-center justify-center gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
+                <Image src={solanaLogo} alt='solana-logo' className='w-10 h-10 rounded-full'/>
+                <div className='flex flex-col'>
+                    <p className='text-base'>Solana</p>
+                    <p className='text-sm dark:text-gray-400'>{`${balance.toFixed(5)} SOL`}</p>
+                </div>
+                <p className='text-lg ml-3'>{solBalanceInUsdc !== null ? `$${solBalanceInUsdc.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A'}</p>
+            </div>
+            ) : null}
+          </div>
 
         {/* TOKENS BALANCE */}
         <div className='mb-10 dark:text-white'>
           <h2 className='text-2xl font-medium mb-4'>Tokens:</h2>
           {buttonClicked && isLoading ? (
-             <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
+            <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
           ) : (
             <ul className='flex flex-col gap-5'>
+              {/* Render tokens with USD values first */}
               {tokenBalances && tokenBalances
-                .filter((token) => token.balance !== 0)
+                .filter((token) => token.balance !== 0 && usdcPrices[token.address] !== undefined)
+                .map((token, index) => {
+                  const totalValue = (token.balance * usdcPrices[token.address]).toFixed(2);
+
+                  return (
+                    <li key={index} className='flex flex-row gap-3 items-center justify-center bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
+                      <img src={token.info.image} alt={token.name} className='w-10 h-10 rounded-full'/>
+                      <div className='flex flex-col'>
+                        <p className='text-base'>{token.info.name}</p>
+                        <p className='text-sm dark:text-gray-400'>{`${token.balance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0})} ${token.info.symbol}`}</p>
+                      </div>
+                      <p className='text-lg ml-3'>{usdcPrices[token.address] !== undefined ? `$${totalValue}` : 'N/A'}</p>
+                    </li>
+                  );
+                })}
+
+              {/* Render tokens without USD values */}
+              {tokenBalances && tokenBalances
+                .filter((token) => token.balance !== 0 && usdcPrices[token.address] === undefined)
                 .map((token, index) => (
-                  <li key={index} className='flex flex-row gap-3'>
-                    <img src={token.info.image} alt={token.name} className='w-8 rounded-full mb-3' />
-                    <span className='text'>{token.balance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
-                    <span className='text-gray-700 dark:text-gray-400'>{token.info.symbol}</span>
+                  <li key={index} className='flex flex-row gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
+                    <img src={token.info.image} alt={token.name} className='w-10 h-10 rounded-full'/>
+                    <div className='flex flex-col'>
+                      <p className='text-base'>{token.info.name}</p>
+                      <p className='text-sm dark:text-gray-400'>{`${token.balance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0})} ${token.info.symbol}`}</p>
+                    </div>
                   </li>
                 ))}
             </ul>
