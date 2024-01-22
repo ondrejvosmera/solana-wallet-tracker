@@ -666,6 +666,9 @@ video {
 .ml-3 {
   margin-left: 0.75rem;
 }
+.ml-10 {
+  margin-left: 2.5rem;
+}
 .flex {
   display: flex;
 }
@@ -756,6 +759,9 @@ video {
 }
 .justify-between {
   justify-content: space-between;
+}
+.justify-around {
+  justify-content: space-around;
 }
 .gap-12 {
   gap: 3rem;

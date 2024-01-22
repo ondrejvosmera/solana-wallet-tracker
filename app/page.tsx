@@ -50,12 +50,6 @@ export default function Home() {
     setIsModalOpen(true);
   };
 
-  const closeModal = () => {
-    setModalImageUrl('');
-    setIsModalOpen(false);
-  };
-
-
     // Function to fetch SOL price
     const fetchSolPrice = async () => {
       try {
@@ -170,6 +164,20 @@ export default function Home() {
   
     return result;
   }
+
+  // Calculate portfolio value in USD (SOL + tokens)
+  const calculateTotalTokenValue = () => {
+    if (!tokenBalances) return 0;
+  
+    return tokenBalances.reduce((totalValue, token) => {
+      const tokenUsdcPrice = usdcPrices[token.address];
+      if (tokenUsdcPrice !== undefined) {
+        totalValue += token.balance * tokenUsdcPrice;
+      }
+      return totalValue;
+    }, 0);
+  };
+  
   
   useEffect(() => {
     if (buttonClicked) {
@@ -209,22 +217,39 @@ export default function Home() {
         </button>
       </div>
 
-        {/* SOL BALANCE */}
-        <div className='flex flex-col items-start w-9/12'>
-          <div className='mb-10 dark:text-white'>
-            <h2 className='text-2xl font-medium mb-4'>SOL balance: </h2>
-            {buttonClicked && <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />}
-            {balance !== null && !buttonClicked ? (
-            <div className='flex flex-row items-center justify-center gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
-                <Image src={solanaLogo} alt='solana-logo' className='w-10 h-10 rounded-full'/>
-                <div className='flex flex-col'>
-                    <p className='text-base'>Solana</p>
-                    <p className='text-sm dark:text-gray-400'>{`${balance.toFixed(5)} SOL`}</p>
-                </div>
-                <p className='text-lg ml-3'>{solBalanceInUsdc !== null ? `$${solBalanceInUsdc.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A'}</p>
+      <div className='flex flex-col items-start w-9/12'>
+
+        {/* TOTAL VALUE */}
+        <div className='mb-10 dark:text-white'>
+          <h2 className='text-2xl font-medium mb-4'>Total value: </h2>
+          {buttonClicked && isLoading ? (
+            <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
+          ) : (
+            <div className='flex flex-row items-center justify-start gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
+              <div className='flex flex-col'>
+                <p className='text-lg font-bold'>
+                  {`$${((solBalanceInUsdc !== null ? solBalanceInUsdc : 0) + calculateTotalTokenValue()).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
+                </p>
+              </div>
             </div>
-            ) : null}
+          )}
+        </div>
+        
+        {/* SOL BALANCE */}
+        <div className='mb-10 dark:text-white'>
+          <h2 className='text-2xl font-medium mb-4'>SOL balance: </h2>
+          {buttonClicked && <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />}
+          {balance !== null && !buttonClicked ? (
+          <div className='flex flex-row items-center justify-start gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
+              <Image src={solanaLogo} alt='solana-logo' className='w-10 h-10 rounded-full'/>
+              <div className='flex flex-col'>
+                  <p className='text-base'>Solana</p>
+                  <p className='text-sm dark:text-gray-400'>{`${balance.toFixed(5)} SOL`}</p>
+              </div>
+              <p className='text-lg ml-3 font-bold'>{solBalanceInUsdc !== null ? `$${solBalanceInUsdc.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A'}</p>
           </div>
+          ) : null}
+        </div>
 
         {/* TOKENS BALANCE */}
         <div className='mb-10 dark:text-white'>
@@ -240,13 +265,15 @@ export default function Home() {
                   const totalValue = (token.balance * usdcPrices[token.address]).toFixed(2);
 
                   return (
-                    <li key={index} className='flex flex-row gap-3 items-center justify-center bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
-                      <img src={token.info.image} alt={token.name} className='w-10 h-10 rounded-full'/>
-                      <div className='flex flex-col'>
-                        <p className='text-base'>{token.info.name}</p>
-                        <p className='text-sm dark:text-gray-400'>{`${token.balance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0})} ${token.info.symbol}`}</p>
+                    <li key={index} className='flex flex-row items-center justify-between bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
+                      <div className='flex flex-row gap-3'>
+                        <img src={token.info.image} alt={token.name} className='w-10 h-10 rounded-full'/>
+                        <div className='flex flex-col'>
+                          <p className='text-base'>{token.info.name}</p>
+                          <p className='text-sm dark:text-gray-400'>{`${token.balance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0})} ${token.info.symbol}`}</p>
+                        </div>
                       </div>
-                      <p className='text-lg ml-3'>{usdcPrices[token.address] !== undefined ? `$${totalValue}` : 'N/A'}</p>
+                      <p className='text-lg ml-5 font-bold'>{usdcPrices[token.address] !== undefined ? `$${totalValue}` : 'N/A'}</p>
                     </li>
                   );
                 })}
