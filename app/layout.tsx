@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
-import { Poppins } from 'next/font/google'
+import { Space_Mono } from 'next/font/google'
 import './globals.css'
 
-const poppins = Poppins({
+const space_mono = Space_Mono({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '700'],
 })
 
 export const metadata: Metadata = {
@@ -19,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={poppins.className}>{children}</body>
+      <body className={space_mono.className}>{children}</body>
     </html>
   )
 }

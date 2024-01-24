@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 :root {
   --foreground-rgb: 255, 255, 255;
@@ -18,4 +18,5 @@
 body {
   color: rgb(var(--text-color));
   background: rgb(var(--foreground-rgb));
+  font-family: 'Space Mono', monospace;
 }

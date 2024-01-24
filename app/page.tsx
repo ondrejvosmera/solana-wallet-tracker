@@ -60,7 +60,6 @@ export default function Home() {
           setSolPrice(solData.data.SOL.price);
         } else {
           console.error("Error getting SOL price:", solData);
-          // Handle the error, you can set a default value for solPrice or display an error message
         }
       } catch (error) {
         console.error('Error fetching SOL price:', error);
@@ -115,8 +114,6 @@ export default function Home() {
       for (const token of tokenBalances) {
         const usdcPriceResponse = await fetch(`https://price.jup.ag/v4/price?ids=${token.address}&vsToken=USDC`);
         const usdcPriceData = await usdcPriceResponse.json();
-
-        console.log(`Response data for ${token.address}:`, usdcPriceData); // Log the response data
 
         if (
           usdcPriceData &&
@@ -191,9 +188,9 @@ export default function Home() {
       <div className="flex justify-between w-full p-4">
 
       <div className='flex flex-row gap-2 absolute top-0 left-0 m-5 dark:text-white'>
-        <h2 className='text-2xlfont-medium mb-4'>SOL price:</h2>
+        <h2 className='text-base font-medium mb-4'>SOL price:</h2>
         {solPrice !== null ? (
-          <span>${solPrice.toFixed(2)}</span>
+          <span className='font-bold text-base'>${solPrice.toFixed(2)}</span>
         ) : (
           <span>Loading...</span>
         )}
@@ -217,27 +214,38 @@ export default function Home() {
         </button>
       </div>
 
-      <div className='flex flex-col items-start w-9/12'>
+     {/* TOTAL VALUE */}
+      <div className='flex flex-col items-center mb-10 dark:text-white relative'>
+        <div className='flex flex-row mb-3'>
+          <h2 className='text-xl font-medium mb-2'>Total value</h2>
+          <div className='relative group'>
+          <span className='cursor-pointer text-[9px] dark:text-gray-400 tooltip-trigger ml-1 inline-flex items-center justify-center rounded-full border border-gray-700 dark:border-dark-300 w-3 h-3'>
+            i
+          </span>
+          <div className={`absolute left-1/2 transform -translate-x-34 -translate-y-12 dark:text-gray-300 dark:bg-gray-800 bg-gray-300 text-black text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 tooltip whitespace-nowrap`}>
+            Only tracks Jupiter supported tokens
+          </div>
 
-        {/* TOTAL VALUE */}
-        <div className='mb-10 dark:text-white'>
-          <h2 className='text-2xl font-medium mb-4'>Total value: </h2>
-          {buttonClicked && isLoading ? (
-            <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
-          ) : (
-            <div className='flex flex-row items-center justify-start gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
-              <div className='flex flex-col'>
-                <p className='text-lg font-bold'>
-                  {`$${((solBalanceInUsdc !== null ? solBalanceInUsdc : 0) + calculateTotalTokenValue()).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
-                </p>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
+        {buttonClicked && isLoading ? (
+          <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
+        ) : (
+          <div className='flex flex-row items-center justify-start gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
+            <div className='flex flex-col'>
+              <p className='text-4xl font-bold'>
+                {`$${((solBalanceInUsdc !== null ? solBalanceInUsdc : 0) + calculateTotalTokenValue()).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className='flex flex-col items-start w-9/12'>
         
         {/* SOL BALANCE */}
         <div className='mb-10 dark:text-white'>
-          <h2 className='text-2xl font-medium mb-4'>SOL balance: </h2>
+          <h2 className='text-xl font-medium mb-4'>SOL balance: </h2>
           {buttonClicked && <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />}
           {balance !== null && !buttonClicked ? (
           <div className='flex flex-row items-center justify-start gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
@@ -253,7 +261,7 @@ export default function Home() {
 
         {/* TOKENS BALANCE */}
         <div className='mb-10 dark:text-white'>
-          <h2 className='text-2xl font-medium mb-4'>Tokens:</h2>
+          <h2 className='text-xl font-medium mb-4'>Tokens:</h2>
           {buttonClicked && isLoading ? (
             <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
           ) : (
@@ -296,14 +304,14 @@ export default function Home() {
 
         {/* NFTs BALANCE */}
         <div className={`dark:text-white max-w-screen-lg items-start`}>
-          <h2 className='text-2xl font-medium mb-4'>NFTs:</h2>
+          <h2 className='text-xl font-medium mb-4'>NFTs:</h2>
           {buttonClicked && isLoading ? (
             <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
           ) : (
             <ul className='flex flex-wrap flex-col gap-8 justify-start'>
               {nftList && groupNFTsByCollection(nftList).map((group, index) => (
                 <li key={index} className='mb-8'>
-                  <h3 className='text-xl font-bold mb-3'>{group.collectionName}</h3>
+                  <h3 className='text-lg font-medium mb-3'>{group.collectionName}</h3>
                   <ul className='flex gap-5 flex-wrap'>
                     {/* Display NFTs under each collection */}
                     {group.nfts.map((nft: any, nftIndex: number) => (
