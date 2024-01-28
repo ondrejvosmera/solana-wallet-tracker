@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hellomoon/api": "^1.17.5",
+    "@next/font": "^14.1.0",
     "@shyft-to/js": "^0.2.31",
     "next": "14.0.4",
     "react": "^18",

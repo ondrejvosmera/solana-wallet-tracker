@@ -15,8 +15,15 @@
   }
 }
 
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/path/to/SpaceGrotesk-Regular.ttf') format('truetype');
+  font-display: swap; /* or optional or fallback, depending on your preference */
+  /* ... other font properties */
+}
+
 body {
+  font-family: 'Space Grotesk', sans-serif;
   color: rgb(var(--text-color));
   background: rgb(var(--foreground-rgb));
-  font-family: 'Space Mono', monospace;
 }

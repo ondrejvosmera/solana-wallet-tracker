@@ -182,7 +182,6 @@ export default function Home() {
     }
   }, [buttonClicked]);
 
-
   return (
     <div className={`dark:bg-black dark:bg-opacity-95 flex flex-col flex-wrap items-center min-h-screen min-w-max pt-28 pb-20 duration-500 ${isDarkMode ? 'dark' : ''}`}>
       <div className="flex justify-between w-full p-4">
@@ -219,7 +218,7 @@ export default function Home() {
         <div className='flex flex-row mb-3'>
           <h2 className='text-xl font-medium mb-2'>Total value</h2>
           <div className='relative group'>
-          <span className='cursor-pointer text-[9px] dark:text-gray-400 tooltip-trigger ml-1 inline-flex items-center justify-center rounded-full border border-gray-700 dark:border-dark-300 w-3 h-3'>
+          <span className='cursor-default text-[6px] dark:text-gray-400 tooltip-trigger ml-1 inline-flex items-center justify-center rounded-full border border-gray-700 dark:border-dark-300 w-3 h-3'>
             i
           </span>
           <div className={`absolute left-1/2 transform -translate-x-34 -translate-y-12 dark:text-gray-300 dark:bg-gray-800 bg-gray-300 text-black text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 tooltip whitespace-nowrap`}>
