@@ -183,7 +183,7 @@ export default function Home() {
   }, [buttonClicked]);
 
   return (
-    <div className={`dark:bg-black dark:bg-opacity-95 flex flex-col flex-wrap items-center min-h-screen min-w-max pt-28 pb-20 duration-500 ${isDarkMode ? 'dark' : ''}`}>
+    <div className={`dark:bg-black dark:bg-opacity-95 flex flex-col flex-wrap items-center min-h-screen min-w-screen pt-28 pb-20 duration-500 ${isDarkMode ? 'dark' : ''}`}>
       <div className="flex justify-between w-full p-4">
 
       <div className='flex flex-row gap-2 absolute top-0 left-0 m-5 dark:text-white'>
@@ -199,12 +199,12 @@ export default function Home() {
           {isDarkMode ? <MdOutlineLightMode className='text-white' /> : <MdOutlineDarkMode />}
         </button>
       </div>
-      <h1 className="text-6xl mb-16 font-semibold dark:text-white">Solana wallet tracker</h1>
-      <div className='flex flex-row gap-3 justify-center items-center mb-10 w-9/12'>
+      <h1 className="xl:text-6xl lg:text-6xl md:text-6xl text-4xl mb-16 font-semibold dark:text-white">Solana wallet tracker</h1>
+      <div className='flex flex-col xl:flex-row lg:flex-row md:flex-row gap-3 justify-center items-center mb-10 w-9/12'>
         <input
           type="text"
           placeholder="Wallet address"
-          className='bg-gray-200 border-none outline-none w-2/6 rounded-xl p-3 pr-4 pl-4 dark:bg-gray-800 dark:text-white'
+          className='bg-gray-200 border-none outline-none w-[20rem] xl:w-[26rem] lg:w-[26rem] md:w-[26rem] rounded-xl p-3 pr-4 pl-4 dark:bg-gray-800 dark:text-white'
           value={walletAddress}
           onChange={handleInputChange}
         />
@@ -221,7 +221,7 @@ export default function Home() {
           <span className='cursor-default text-[6px] dark:text-gray-400 tooltip-trigger ml-1 inline-flex items-center justify-center rounded-full border border-gray-700 dark:border-dark-300 w-3 h-3'>
             i
           </span>
-          <div className={`absolute left-1/2 transform -translate-x-34 -translate-y-12 dark:text-gray-300 dark:bg-gray-800 bg-gray-300 text-black text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 tooltip whitespace-nowrap`}>
+          <div className={`absolute left-1/2 transform -translate-x-40 -translate-y-14 xl:translate-x-2 xl:-translate-y-12 lg:translate-x-2 lg:-translate-y-12 md:translate-x-2 md:-translate-y-12 dark:text-gray-300 dark:bg-gray-800 bg-gray-300 text-black text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 tooltip whitespace-nowrap`}>
             Only tracks Jupiter supported tokens
           </div>
 
@@ -240,7 +240,7 @@ export default function Home() {
         )}
       </div>
 
-      <div className='flex flex-col items-start w-9/12'>
+      <div className='flex flex-col items-center xl:items-start lg:items-start md:items-start w-9/12'>
         
         {/* SOL BALANCE */}
         <div className='mb-10 dark:text-white'>
