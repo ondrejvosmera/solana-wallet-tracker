@@ -21,6 +21,7 @@ export default function Home() {
   const [balance, setBalance] = useState<number | null>(null);
   const [tokenBalances, setTokenBalances] = useState<any[] | null>(null);
   const [nftList, setNftList] = useState<any[] | null>(null);
+  const [compressedNftList, setCompressedNftList] = useState<any[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [buttonClicked, setButtonClicked] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -106,8 +107,17 @@ export default function Home() {
         owner: walletAddress,
       });
 
+      // Fetch cNFTs
+      const compressedNftList = await shyft.nft.compressed.readAll({
+        walletAddress: walletAddress,
+      });
+
       setBalance(solBalance);
       setTokenBalances(tokenBalances);
+      setCompressedNftList(compressedNftList);
+
+      console.log('cNFTS', compressedNftList);
+      console.log('NFTS', nftList);
 
       // Fetch USDC prices for each token
       const usdcPricesData: { [key: string]: number } = {};
@@ -332,6 +342,30 @@ export default function Home() {
             </ul>
           )}
         </div>
+
+       {/* cNFTs BALANCE */}
+      <div className={`dark:text-white max-w-screen-lg items-start`}>
+        <h2 className='text-xl font-medium mb-4'>cNFTs:</h2>
+        {buttonClicked && isLoading ? (
+          <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
+        ) : (
+          <ul className='flex flex-wrap flex-col gap-8 justify-start'>
+            {compressedNftList && compressedNftList.map((cNFT, index) => (
+              <li key={index} className="flex flex-col items-center mb-4">
+                {cNFT.cached_image_uri && (
+                  <img
+                    src={cNFT.cached_image_uri}
+                    alt={cNFT.name}
+                    className='w-40 mb-3 cursor-pointer hover:opacity-75'
+                    onClick={() => openModal(cNFT.cached_image_uri, cNFT.attributes, cNFT.name)}
+                  />
+                )}
+                <h4 className='text-sm text-gray-700 dark:text-gray-400'>{cNFT.name}</h4>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       </div>
       {/* Render the modal if it's open */}
