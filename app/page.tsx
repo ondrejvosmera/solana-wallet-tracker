@@ -18,6 +18,7 @@ const shyft = new ShyftSdk({ apiKey: 'q4uEPvIuyvnxwm2U', network: Network.Mainne
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [walletAddress, setWalletAddress] = useState<string>('');
+  const [walletAdded, setWalletAdded] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
   const [tokenBalances, setTokenBalances] = useState<any[] | null>(null);
   const [nftList, setNftList] = useState<any[] | null>(null);
@@ -74,7 +75,7 @@ export default function Home() {
 
 
   const handleAddWallet = async () => {
-    setButtonClicked(true);
+    setWalletAdded(true);
     setIsLoading(true);
 
     try {
@@ -253,119 +254,127 @@ export default function Home() {
       <div className='flex flex-col items-center xl:items-start lg:items-start md:items-start w-9/12'>
         
         {/* SOL BALANCE */}
-        <div className='mb-10 dark:text-white'>
-          <h2 className='text-xl font-medium mb-4'>SOL balance: </h2>
-          {buttonClicked && <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />}
-          {balance !== null && !buttonClicked ? (
-          <div className='flex flex-row items-center justify-start gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
-              <Image src={solanaLogo} alt='solana-logo' className='w-10 h-10 rounded-full'/>
-              <div className='flex flex-col'>
-                  <p className='text-base'>Solana</p>
-                  <p className='text-sm dark:text-gray-400'>{`${balance.toFixed(5)} SOL`}</p>
-              </div>
-              <p className='text-lg ml-3 font-bold'>{solBalanceInUsdc !== null ? `$${solBalanceInUsdc.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A'}</p>
+        {walletAdded && (
+          <div className='mb-10 dark:text-white'>
+            <h2 className='text-xl font-medium mb-4'>SOL balance: </h2>
+            {buttonClicked && <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />}
+            {balance !== null && !buttonClicked ? (
+            <div className='flex flex-row items-center justify-start gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
+                <Image src={solanaLogo} alt='solana-logo' className='w-10 h-10 rounded-full'/>
+                <div className='flex flex-col'>
+                    <p className='text-base'>Solana</p>
+                    <p className='text-sm dark:text-gray-400'>{`${balance.toFixed(5)} SOL`}</p>
+                </div>
+                <p className='text-lg ml-3 font-bold'>{solBalanceInUsdc !== null ? `$${solBalanceInUsdc.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A'}</p>
+            </div>
+            ) : null}
           </div>
-          ) : null}
-        </div>
+        )}
 
         {/* TOKENS BALANCE */}
-        <div className='mb-10 dark:text-white'>
-          <h2 className='text-xl font-medium mb-4'>Tokens:</h2>
-          {buttonClicked && isLoading ? (
-            <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
-          ) : (
-            <ul className='flex flex-col gap-5'>
-              {/* Render tokens with USD values first */}
-              {tokenBalances && tokenBalances
-                .filter((token) => token.balance !== 0 && usdcPrices[token.address] !== undefined)
-                .map((token, index) => {
-                  const totalValue = (token.balance * usdcPrices[token.address]).toFixed(2);
+        {walletAdded && (
+          <div className='mb-10 dark:text-white'>
+            <h2 className='text-xl font-medium mb-4'>Tokens:</h2>
+            {buttonClicked && isLoading ? (
+              <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
+            ) : (
+              <ul className='flex flex-col gap-5'>
+                {/* Render tokens with USD values first */}
+                {tokenBalances && tokenBalances
+                  .filter((token) => token.balance !== 0 && usdcPrices[token.address] !== undefined)
+                  .map((token, index) => {
+                    const totalValue = (token.balance * usdcPrices[token.address]).toFixed(2);
 
-                  return (
-                    <li key={index} className='flex flex-row items-center justify-between bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
-                      <div className='flex flex-row gap-3'>
-                        <img src={token.info.image} alt={token.name} className='w-10 h-10 rounded-full'/>
-                        <div className='flex flex-col'>
-                          <p className='text-base'>{token.info.name}</p>
-                          <p className='text-sm dark:text-gray-400'>{`${token.balance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0})} ${token.info.symbol}`}</p>
+                    return (
+                      <li key={index} className='flex flex-row items-center justify-between bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
+                        <div className='flex flex-row gap-3'>
+                          <img src={token.info.image} alt={token.name} className='w-10 h-10 rounded-full'/>
+                          <div className='flex flex-col'>
+                            <p className='text-base'>{token.info.name}</p>
+                            <p className='text-sm dark:text-gray-400'>{`${token.balance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0})} ${token.info.symbol}`}</p>
+                          </div>
                         </div>
-                      </div>
-                      <p className='text-lg ml-5 font-bold'>{usdcPrices[token.address] !== undefined ? `$${totalValue}` : 'N/A'}</p>
-                    </li>
-                  );
-                })}
+                        <p className='text-lg ml-5 font-bold'>{usdcPrices[token.address] !== undefined ? `$${totalValue}` : 'N/A'}</p>
+                      </li>
+                    );
+                  })}
 
-              {/* Render tokens without USD values */}
-              {tokenBalances && tokenBalances
-                .filter((token) => token.balance !== 0 && usdcPrices[token.address] === undefined)
-                .map((token, index) => (
-                  <li key={index} className='flex flex-row gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
-                    <img src={token.info.image} alt={token.name} className='w-10 h-10 rounded-full'/>
-                    <div className='flex flex-col'>
-                      <p className='text-base'>{token.info.name}</p>
-                      <p className='text-sm dark:text-gray-400'>{`${token.balance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0})} ${token.info.symbol}`}</p>
-                    </div>
-                  </li>
-                ))}
-            </ul>
-          )}
-        </div>
+                {/* Render tokens without USD values */}
+                {tokenBalances && tokenBalances
+                  .filter((token) => token.balance !== 0 && usdcPrices[token.address] === undefined)
+                  .map((token, index) => (
+                    <li key={index} className='flex flex-row gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
+                      <img src={token.info.image} alt={token.name} className='w-10 h-10 rounded-full'/>
+                      <div className='flex flex-col'>
+                        <p className='text-base'>{token.info.name}</p>
+                        <p className='text-sm dark:text-gray-400'>{`${token.balance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0})} ${token.info.symbol}`}</p>
+                      </div>
+                    </li>
+                  ))}
+              </ul>
+            )}
+          </div>
+        )}
 
         {/* NFTs BALANCE */}
+        {walletAdded && (
+          <div className={`dark:text-white max-w-screen-lg items-start mb-10`}>
+            <h2 className='text-xl font-medium mb-4'>NFTs:</h2>
+            {buttonClicked && isLoading ? (
+              <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
+            ) : (
+              <ul className='flex flex-wrap flex-col gap-8 justify-start'>
+                {nftList && groupNFTsByCollection(nftList).map((group, index) => (
+                  <li key={index} className='mb-8'>
+                    <h3 className='text-lg font-medium mb-3'>{group.collectionName}</h3>
+                    <ul className='flex gap-5 flex-wrap'>
+                      {/* Display NFTs under each collection */}
+                      {group.nfts.map((nft: any, nftIndex: number) => (
+                        <li key={nftIndex} className="flex flex-col items-center mb-4">
+                          {nft.cached_image_uri && (
+                            <img
+                              src={nft.cached_image_uri}
+                              alt={nft.name}
+                              className='w-40 mb-3 cursor-pointer hover:opacity-75'
+                              onClick={() => openModal(nft.cached_image_uri, nft.attributes, nft.name)}
+                            />
+                          )}
+                          <h4 className='text-sm text-gray-700 dark:text-gray-400'>{nft.name}</h4>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+      {/* cNFTs BALANCE */}
+      {walletAdded && (
         <div className={`dark:text-white max-w-screen-lg items-start`}>
-          <h2 className='text-xl font-medium mb-4'>NFTs:</h2>
+          <h2 className='text-xl font-medium mb-4'>cNFTs:</h2>
           {buttonClicked && isLoading ? (
             <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
           ) : (
-            <ul className='flex flex-wrap flex-col gap-8 justify-start'>
-              {nftList && groupNFTsByCollection(nftList).map((group, index) => (
-                <li key={index} className='mb-8'>
-                  <h3 className='text-lg font-medium mb-3'>{group.collectionName}</h3>
-                  <ul className='flex gap-5 flex-wrap'>
-                    {/* Display NFTs under each collection */}
-                    {group.nfts.map((nft: any, nftIndex: number) => (
-                      <li key={nftIndex} className="flex flex-col items-center mb-4">
-                        {nft.cached_image_uri && (
-                          <img
-                            src={nft.cached_image_uri}
-                            alt={nft.name}
-                            className='w-40 mb-3 cursor-pointer hover:opacity-75'
-                            onClick={() => openModal(nft.cached_image_uri, nft.attributes, nft.name)}
-                          />
-                        )}
-                        <h4 className='text-sm text-gray-700 dark:text-gray-400'>{nft.name}</h4>
-                      </li>
-                    ))}
-                  </ul>
+            <ul className='flex flex-wrap gap-4 justify-start'>
+              {compressedNftList && compressedNftList.map((cNFT, index) => (
+                <li key={index} className="flex flex-col items-center mb-4">
+                  {cNFT.cached_image_uri && (
+                    <img
+                      src={cNFT.cached_image_uri}
+                      alt={cNFT.name}
+                      className='w-40 mb-3 cursor-pointer hover:opacity-75'
+                      onClick={() => openModal(cNFT.cached_image_uri, cNFT.attributes, cNFT.name)}
+                    />
+                  )}
+                  <h4 className='text-sm text-gray-700 dark:text-gray-400'>{cNFT.name}</h4>
                 </li>
               ))}
             </ul>
           )}
         </div>
-
-       {/* cNFTs BALANCE */}
-      <div className={`dark:text-white max-w-screen-lg items-start`}>
-        <h2 className='text-xl font-medium mb-4'>cNFTs:</h2>
-        {buttonClicked && isLoading ? (
-          <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
-        ) : (
-          <ul className='flex flex-wrap flex-col gap-8 justify-start'>
-            {compressedNftList && compressedNftList.map((cNFT, index) => (
-              <li key={index} className="flex flex-col items-center mb-4">
-                {cNFT.cached_image_uri && (
-                  <img
-                    src={cNFT.cached_image_uri}
-                    alt={cNFT.name}
-                    className='w-40 mb-3 cursor-pointer hover:opacity-75'
-                    onClick={() => openModal(cNFT.cached_image_uri, cNFT.attributes, cNFT.name)}
-                  />
-                )}
-                <h4 className='text-sm text-gray-700 dark:text-gray-400'>{cNFT.name}</h4>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      )}
 
       </div>
       {/* Render the modal if it's open */}

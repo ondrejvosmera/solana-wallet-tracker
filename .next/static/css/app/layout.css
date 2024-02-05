@@ -696,6 +696,9 @@ video {
 .ml-5 {
   margin-left: 1.25rem;
 }
+.mt-10 {
+  margin-top: 2.5rem;
+}
 .flex {
   display: flex;
 }
@@ -704,9 +707,6 @@ video {
 }
 .grid {
   display: grid;
-}
-.hidden {
-  display: none;
 }
 .h-10 {
   height: 2.5rem;
@@ -805,6 +805,9 @@ video {
 }
 .gap-3 {
   gap: 0.75rem;
+}
+.gap-4 {
+  gap: 1rem;
 }
 .gap-5 {
   gap: 1.25rem;
