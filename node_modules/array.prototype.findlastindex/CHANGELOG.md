@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.2.4](https://github.com/es-shims/Array.prototype.findLastIndex/compare/v1.2.3...v1.2.4) - 2024-02-05
+
+### Commits
+
+- [Deps] update `call-bind`, `define-properties`, `es-abstract`, `es-shim-unscopables`, `get-intrinsic` [`b689455`](https://github.com/es-shims/Array.prototype.findLastIndex/commit/b689455f6194d84d929bd678755a175aa63b1b37)
+- [Refactor] use `es-errors`, so things that only need those do not need `get-intrinsic` [`ca636e6`](https://github.com/es-shims/Array.prototype.findLastIndex/commit/ca636e60abae73755c613117f9a8eccb49a32f48)
+- [Tests] use `functions-have-names` [`b91692c`](https://github.com/es-shims/Array.prototype.findLastIndex/commit/b91692c2a695c0065805fcb4f6b6f081d27852c8)
+- [Dev Deps] update `aud`, `npmignore`, `tape` [`4f87dff`](https://github.com/es-shims/Array.prototype.findLastIndex/commit/4f87dff212fd5f0b05bdd412e669b4536e8b06f9)
+- [Dev Deps] use `hasown` instead of `has` [`57ce292`](https://github.com/es-shims/Array.prototype.findLastIndex/commit/57ce2920dc645c3dec27b3aa8bcbfff9b0bfd135)
+- [Dev Deps] update `object-inspect`, `tape` [`fa74bab`](https://github.com/es-shims/Array.prototype.findLastIndex/commit/fa74babe7cf90ec07b8c12c3ab10e89b7093e0b4)
+
 ## [v1.2.3](https://github.com/es-shims/Array.prototype.findLastIndex/compare/v1.2.2...v1.2.3) - 2023-08-29
 
 ### Commits

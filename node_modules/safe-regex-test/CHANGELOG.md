@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.0.2](https://github.com/ljharb/safe-regex-test/compare/v1.0.1...v1.0.2) - 2024-01-11
+
+### Commits
+
+- [meta] package.json `sideEffects` should be boolean [`094bb88`](https://github.com/ljharb/safe-regex-test/commit/094bb88d93ce25e26d20f5badee4e45acf0e3ac5)
+
 ## [v1.0.1](https://github.com/ljharb/safe-regex-test/compare/v1.0.0...v1.0.1) - 2024-01-09
 
 ### Commits

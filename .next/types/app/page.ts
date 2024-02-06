@@ -1,4 +1,4 @@
-// File: /Users/ondrejvosmera/Desktop/solana_wallet_tracker/app/page.tsx
+// File: /Users/ondrejvosmera/Desktop/solana-wallet-tracker/app/page.tsx
 import * as entry from '../../../app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

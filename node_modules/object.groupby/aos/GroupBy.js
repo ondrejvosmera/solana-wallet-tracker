@@ -1,7 +1,5 @@
 'use strict';
 
-var GetIntrinsic = require('get-intrinsic');
-
 var AddValueToKeyedGroup = require('./AddValueToKeyedGroup');
 var Call = require('es-abstract/2023/Call');
 var GetIterator = require('es-abstract/2023/GetIterator');
@@ -15,7 +13,7 @@ var ToPropertyKey = require('es-abstract/2023/ToPropertyKey');
 
 var maxSafeInteger = require('es-abstract/helpers/maxSafeInteger');
 
-var $TypeError = GetIntrinsic('%TypeError%');
+var $TypeError = require('es-errors/type');
 
 module.exports = function GroupBy(items, callbackfn, coercion) {
 	if (coercion !== 'property' && coercion !== 'zero') {

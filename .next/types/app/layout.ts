@@ -1,4 +1,4 @@
-// File: /Users/ondrejvosmera/Desktop/solana_wallet_tracker/app/layout.tsx
+// File: /Users/ondrejvosmera/Desktop/solana-wallet-tracker/app/layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

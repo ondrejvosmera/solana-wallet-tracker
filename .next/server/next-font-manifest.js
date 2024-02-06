@@ -1,1 +1,1 @@
-self.__NEXT_FONT_MANIFEST="{\"pages\":{},\"app\":{\"/Users/ondrejvosmera/Desktop/solana_wallet_tracker/app/layout\":[\"static/media/2d141e1a38819612-s.p.woff2\"]},\"appUsingSizeAdjust\":true,\"pagesUsingSizeAdjust\":false}"
+self.__NEXT_FONT_MANIFEST="{\"pages\":{},\"app\":{\"/Users/ondrejvosmera/Desktop/solana-wallet-tracker/app/layout\":[\"static/media/2d141e1a38819612-s.p.woff2\"]},\"appUsingSizeAdjust\":true,\"pagesUsingSizeAdjust\":false}"

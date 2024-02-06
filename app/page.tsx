@@ -14,6 +14,7 @@ import solanaLogo from './solana-logo.png';
 // 86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdaMpo2MMY (toly's wallet)
 
 const shyft = new ShyftSdk({ apiKey: 'q4uEPvIuyvnxwm2U', network: Network.Mainnet });
+const axios = require('axios');
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -112,6 +113,39 @@ export default function Home() {
       const compressedNftList = await shyft.nft.compressed.readAll({
         walletAddress: walletAddress,
       });
+
+      const options = {
+        method: 'GET',
+        url: `https://api-mainnet.magiceden.dev/v2/wallets/${walletAddress}/tokens`,
+        headers: { accept: 'application/json' }
+      };
+      
+      axios
+        .request(options)
+        .then(async function (response: any) {
+          const collections = response.data.map((token: any) => token.collection);
+          console.log("Collections:", collections);
+      
+          // Fetch price for each collection
+          for (const collection of collections) {
+            const priceOptions = {
+              method: 'GET',
+              url: `https://api-mainnet.magiceden.dev/v2/collections/${collection}/stats`,
+              headers: { accept: 'application/json' }
+            };
+      
+            try {
+              const priceResponse = await axios.request(priceOptions);
+              const price = priceResponse.data.floorPrice;
+              console.log(`Price for collection ${collection}: ${price}`);
+            } catch (error) {
+              console.error(`Error fetching price for collection ${collection}:`, error);
+            }
+          }
+        })
+        .catch(function (error: any) {
+          console.error(error);
+        });
 
       setBalance(solBalance);
       setTokenBalances(tokenBalances);
