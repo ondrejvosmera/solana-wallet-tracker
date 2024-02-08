@@ -22,7 +22,6 @@ export default function Home() {
   const [walletAdded, setWalletAdded] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
   const [tokenBalances, setTokenBalances] = useState<any[] | null>(null);
-  const [nftList, setNftList] = useState<any[] | null>(null);
   const [compressedNftList, setCompressedNftList] = useState<any[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [buttonClicked, setButtonClicked] = useState(false);
@@ -104,55 +103,26 @@ export default function Home() {
         wallet: walletAddress,
       });
 
-      // Fetch NFTs
-      const nftList = await shyft.nft.getNftByOwner({
-        owner: walletAddress,
-      });
+      // Function to fetch NFTs from Magic Eden API
+      const fetchNFTs = async () => {
+        try {
+          const response = await axios.get(`https://api-mainnet.magiceden.dev/v2/wallets/${walletAddress}/tokens`);
+          console.log('NFTs:', response.data);
+        } catch (error) {
+          console.error('Error fetching NFTs:', error);
+        }
+      };
 
       // Fetch cNFTs
       const compressedNftList = await shyft.nft.compressed.readAll({
         walletAddress: walletAddress,
       });
 
-      const options = {
-        method: 'GET',
-        url: `https://api-mainnet.magiceden.dev/v2/wallets/${walletAddress}/tokens`,
-        headers: { accept: 'application/json' }
-      };
-      
-      axios
-        .request(options)
-        .then(async function (response: any) {
-          const collections = response.data.map((token: any) => token.collection);
-          console.log("Collections:", collections);
-      
-          // Fetch price for each collection
-          for (const collection of collections) {
-            const priceOptions = {
-              method: 'GET',
-              url: `https://api-mainnet.magiceden.dev/v2/collections/${collection}/stats`,
-              headers: { accept: 'application/json' }
-            };
-      
-            try {
-              const priceResponse = await axios.request(priceOptions);
-              const price = priceResponse.data.floorPrice;
-              console.log(`Price for collection ${collection}: ${price}`);
-            } catch (error) {
-              console.error(`Error fetching price for collection ${collection}:`, error);
-            }
-          }
-        })
-        .catch(function (error: any) {
-          console.error(error);
-        });
-
       setBalance(solBalance);
       setTokenBalances(tokenBalances);
       setCompressedNftList(compressedNftList);
 
       console.log('cNFTS', compressedNftList);
-      console.log('NFTS', nftList);
 
       // Fetch USDC prices for each token
       const usdcPricesData: { [key: string]: number } = {};
@@ -172,8 +142,8 @@ export default function Home() {
         }
       }
 
+      fetchNFTs();
       setUsdcPrices(usdcPricesData);
-      setNftList(Array.isArray(nftList) ? nftList : [nftList]);
     } catch (error) {
       console.error('Error fetching balances:', error);
     } finally {
@@ -181,31 +151,6 @@ export default function Home() {
       setButtonClicked(false);
     }
   };
-
-  function groupNFTsByCollection(nftList: any[] | null) {
-    if (!nftList) {
-      return [];
-    }
-  
-    const groupedNFTs: Record<string, any[]> = {};
-  
-    // Group NFTs by their collection name or symbol
-    nftList.forEach((nft) => {
-      const collectionName = nft.collection.name || nft.symbol;
-      if (!groupedNFTs[collectionName]) {
-        groupedNFTs[collectionName] = [];
-      }
-      groupedNFTs[collectionName].push(nft);
-    });
-  
-    // Convert the grouped data into an array for rendering
-    const result = Object.keys(groupedNFTs).map((collectionName) => ({
-      collectionName,
-      nfts: groupedNFTs[collectionName],
-    }));
-  
-    return result;
-  }
 
   // Calculate portfolio value in USD (SOL + tokens)
   const calculateTotalTokenValue = () => {
@@ -345,40 +290,6 @@ export default function Home() {
                       </div>
                     </li>
                   ))}
-              </ul>
-            )}
-          </div>
-        )}
-
-        {/* NFTs BALANCE */}
-        {walletAdded && (
-          <div className={`dark:text-white max-w-screen-lg items-start mb-10`}>
-            <h2 className='text-xl font-medium mb-4'>NFTs:</h2>
-            {buttonClicked && isLoading ? (
-              <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
-            ) : (
-              <ul className='flex flex-wrap flex-col gap-8 justify-start'>
-                {nftList && groupNFTsByCollection(nftList).map((group, index) => (
-                  <li key={index} className='mb-8'>
-                    <h3 className='text-lg font-medium mb-3'>{group.collectionName}</h3>
-                    <ul className='flex gap-5 flex-wrap'>
-                      {/* Display NFTs under each collection */}
-                      {group.nfts.map((nft: any, nftIndex: number) => (
-                        <li key={nftIndex} className="flex flex-col items-center mb-4">
-                          {nft.cached_image_uri && (
-                            <img
-                              src={nft.cached_image_uri}
-                              alt={nft.name}
-                              className='w-40 mb-3 cursor-pointer hover:opacity-75'
-                              onClick={() => openModal(nft.cached_image_uri, nft.attributes, nft.name)}
-                            />
-                          )}
-                          <h4 className='text-sm text-gray-700 dark:text-gray-400'>{nft.name}</h4>
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
               </ul>
             )}
           </div>
