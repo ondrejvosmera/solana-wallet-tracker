@@ -22,6 +22,7 @@ export default function Home() {
   const [walletAdded, setWalletAdded] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
   const [tokenBalances, setTokenBalances] = useState<any[] | null>(null);
+  const [nftList, setNftList] = useState<any[]>([]);
   const [compressedNftList, setCompressedNftList] = useState<any[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [buttonClicked, setButtonClicked] = useState(false);
@@ -108,6 +109,7 @@ export default function Home() {
         try {
           const response = await axios.get(`https://api-mainnet.magiceden.dev/v2/wallets/${walletAddress}/tokens`);
           console.log('NFTs:', response.data);
+          setNftList(response.data);
         } catch (error) {
           console.error('Error fetching NFTs:', error);
         }
@@ -295,6 +297,32 @@ export default function Home() {
           </div>
         )}
 
+        {/* NFTs BALANCE */}
+        {walletAdded && (
+          <div className={`dark:text-white max-w-screen-lg items-start`}>
+            <h2 className='text-xl font-medium mb-4'>NFTs:</h2>
+            {buttonClicked && isLoading ? (
+              <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
+            ) : (
+              <ul className='flex flex-wrap gap-4 justify-start'>
+                {nftList && nftList.map((nft, index) => (
+                  <li key={index} className="flex flex-col items-center mb-4">
+                    {nft.image && (
+                      <img
+                        src={nft.image}
+                        alt={nft.name}
+                        className='w-40 mb-3 cursor-pointer hover:opacity-75'
+                        onClick={() => openModal(nft.properties.files[0].uri, nft.attributes, nft.name)}
+                      />
+                    )}
+                    <h4 className='text-sm text-gray-700 dark:text-gray-400'>{nft.name}</h4>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
       {/* cNFTs BALANCE */}
       {walletAdded && (
         <div className={`dark:text-white max-w-screen-lg items-start`}>
@@ -324,7 +352,12 @@ export default function Home() {
       </div>
       {/* Render the modal if it's open */}
       {isModalOpen && (
-        <NftModal imageUrl={modalImageUrl} nftName={nftName} onClose={() => setIsModalOpen(false)} nftAttributes={nftAttributes} />
+        <NftModal
+          imageUrl={modalImageUrl}
+          nftName={nftName}
+          onClose={() => setIsModalOpen(false)}
+          nftAttributes={Object.entries(nftAttributes).map(([trait_type, value]) => ({ trait_type, value }))}
+        />
       )}
     </div>
   );
