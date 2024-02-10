@@ -46,12 +46,19 @@ export default function Home() {
     setWalletAddress(event.target.value);
   };
 
-  const openModal = (imageUrl: string, nftAttributes: { [key: string]: string }, nftName: string) => {
+  
+  const openModal = (imageUrl: string, nftAttributes: { [key: string]: string }[], nftName: string) => {
+    const attributesObject: { [key: string]: string } = {};
+    nftAttributes.forEach(attribute => {
+        attributesObject[attribute.trait_type] = attribute.value;
+    });
+
     setModalImageUrl(imageUrl);
-    setNftAttributes(nftAttributes);
+    setNftAttributes(attributesObject);
     setNftName(nftName);
     setIsModalOpen(true);
-  };
+};
+
 
     // Function to fetch SOL price
     const fetchSolPrice = async () => {
@@ -352,13 +359,13 @@ export default function Home() {
       </div>
       {/* Render the modal if it's open */}
       {isModalOpen && (
-        <NftModal
-          imageUrl={modalImageUrl}
-          nftName={nftName}
-          onClose={() => setIsModalOpen(false)}
-          nftAttributes={Object.entries(nftAttributes).map(([trait_type, value]) => ({ trait_type, value }))}
-        />
-      )}
+  <NftModal
+    imageUrl={modalImageUrl}
+    nftName={nftName}
+    onClose={() => setIsModalOpen(false)}
+    nftAttributes={nftAttributes}
+  />
+)}
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { IoClose } from "react-icons/io5";
 interface NftModalProps {
   imageUrl: string;
   onClose: () => void;
-  nftAttributes: { trait_type: string; value: string }[];
+  nftAttributes: { [key: string]: string };
   nftName: string;
 }
 
@@ -14,21 +14,16 @@ const NftModal: React.FC<NftModalProps> = ({ imageUrl, onClose, nftAttributes, n
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        // Clicked outside the modal, close it
         onClose();
       }
     };
 
-    // Attach the event listener when the modal is open
     document.addEventListener('mousedown', handleClickOutside);
 
-    // Remove the event listener when the modal is closed
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [onClose]);
-
-  console.log("nftAttributes:", nftAttributes);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -47,13 +42,16 @@ const NftModal: React.FC<NftModalProps> = ({ imageUrl, onClose, nftAttributes, n
         <div className='flex flex-col items-center xl:items-start lg:items-start xl:flex-row lg:flex-row gap-12'>
           <img src={imageUrl} alt="NFT" className="xl:w-[32rem] mb-4 object-cover lg:w-[24rem] w-[24rem]" />
 
-          <div className='grid xl:grid-cols-3 lg:grid-cols-3 md:grid-cols-3 grid-cols-2 gap-5'>
-          {nftAttributes.map((attribute, index) => (
-            <div key={index} className='flex flex-col p-3 bg-gray-300 dark:bg-gray-700 rounded-xl max-w-36 max-h-36'>
-              <span className='text-xs dark:text-gray-400'>{attribute.trait_type}:</span>
-              <span className='flex items-center text-sm font-medium'>{attribute.value}</span>
-            </div>
-          ))}
+          <div>
+            <h4 className="text-lg font-bold mb-2">Attributes:</h4>
+            <ul className="ml-5">
+              {Object.entries(nftAttributes).map(([key, value]) => (
+                <li key={key}>
+                  <span className="font-semibold">{key}: </span>
+                  {value}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
