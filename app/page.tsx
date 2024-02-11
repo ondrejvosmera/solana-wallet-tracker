@@ -306,7 +306,7 @@ export default function Home() {
 
         {/* NFTs BALANCE */}
         {walletAdded && (
-          <div className={`dark:text-white max-w-screen-lg items-start`}>
+          <div className={`dark:text-white max-w-screen-lg items-start mb-10`}>
             <h2 className='text-xl font-medium mb-4'>NFTs:</h2>
             {buttonClicked && isLoading ? (
               <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
@@ -359,13 +359,13 @@ export default function Home() {
       </div>
       {/* Render the modal if it's open */}
       {isModalOpen && (
-  <NftModal
-    imageUrl={modalImageUrl}
-    nftName={nftName}
-    onClose={() => setIsModalOpen(false)}
-    nftAttributes={nftAttributes}
-  />
-)}
+        <NftModal
+          imageUrl={modalImageUrl}
+          nftName={nftName}
+          onClose={() => setIsModalOpen(false)}
+          nftAttributes={nftAttributes}
+        />
+      )}
     </div>
   );
 }
