@@ -33,6 +33,8 @@ export default function Home() {
   const [solPrice, setSolPrice] = useState<number | null>(null);
   const [solBalanceInUsdc, setSolBalanceInUsdc] = useState<number | null>(null);
   const [usdcPrices, setUsdcPrices] = useState<{ [key: string]: number }>({});
+  const [collectionFloorPrices, setCollectionFloorPrices] = useState<{ [key: string]: number }>({});
+
 
   useEffect(() => {
     document.body.className = isDarkMode ? 'dark' : '';
@@ -111,16 +113,35 @@ export default function Home() {
         wallet: walletAddress,
       });
 
-      // Function to fetch NFTs from Magic Eden API
-      const fetchNFTs = async () => {
-        try {
-          const response = await axios.get(`https://api-mainnet.magiceden.dev/v2/wallets/${walletAddress}/tokens`);
-          console.log('NFTs:', response.data);
-          setNftList(response.data);
-        } catch (error) {
-          console.error('Error fetching NFTs:', error);
-        }
-      };
+  // Function to fetch NFTs from Magic Eden API and floor prices
+  const fetchNFTsAndFloorPrices = async () => {
+    try {
+      // Fetch NFTs
+      const nftResponse = await axios.get(`https://api-mainnet.magiceden.dev/v2/wallets/${walletAddress}/tokens`);
+      const nftData: { collection: string }[] = nftResponse.data;
+      setNftList(nftData);
+
+      // Fetch floor prices
+      const collectionSymbols: string[] = Array.from(new Set(nftData.map((nft) => nft.collection)));
+      const floorPrices: Record<string, number> = {};
+
+      for (const collectionSymbol of collectionSymbols) {
+        const response = await axios.get(`https://api-mainnet.magiceden.dev/v2/collections/${collectionSymbol}/stats`);
+        const floorPrice = response.data.floorPrice / Math.pow(10, 9);
+        console.log(`Floor price for ${collectionSymbol}:`, floorPrice);
+        floorPrices[collectionSymbol] = floorPrice;
+      }
+
+      setCollectionFloorPrices(floorPrices);
+    } catch (error) {
+      console.error('Error fetching NFTs and/or floor prices:', error);
+    }
+  };
+
+  // Call the fetchNFTsAndFloorPrices function when walletAddress is not empty
+  if (walletAddress) {
+    fetchNFTsAndFloorPrices();
+  }
 
       // Fetch cNFTs
       const compressedNftList = await shyft.nft.compressed.readAll({
@@ -147,11 +168,10 @@ export default function Home() {
         ) {
           usdcPricesData[token.address] = usdcPriceData.data[token.address].price;
         } else {
-          console.error(`Error getting USDC price for ${token.address}:`, usdcPriceData);
+          console.error(`Error getting USDC price for ${token.address}:`);
         }
       }
 
-      fetchNFTs();
       setUsdcPrices(usdcPricesData);
     } catch (error) {
       console.error('Error fetching balances:', error);
@@ -172,6 +192,20 @@ export default function Home() {
       }
       return totalValue;
     }, 0);
+  };
+
+  // Function to calculate the total price of NFTs
+  const calculateTotalNftPrice = () => {
+    if (!nftList || nftList.length === 0 || !collectionFloorPrices) return 0;
+
+    let totalPrice = 0;
+
+    nftList.forEach(nft => {
+      const collectionPrice = collectionFloorPrices[nft.collection] || 0;
+      totalPrice += collectionPrice;
+    });
+
+    return totalPrice;
   };
   
   
@@ -238,6 +272,24 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* NFTs Floor Prices */}
+      {walletAdded && (
+        <div className='flex flex-col items-center mb-10 dark:text-white'>
+          <h2 className='text-xl font-medium mb-2'>NFTs Floor Prices: </h2>
+          {buttonClicked && isLoading ? (
+          <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
+          ) : (
+          <div className='flex flex-row items-center justify-start gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
+            <div className='flex flex-col'>
+              <p className='text-base'>
+                {`${calculateTotalNftPrice().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SOL`}
+              </p>
+            </div>
+          </div>
+          )}
+        </div>
+      )}
 
       <div className='flex flex-col items-center xl:items-start lg:items-start md:items-start w-9/12'>
         

@@ -27,7 +27,7 @@ const NftModal: React.FC<NftModalProps> = ({ imageUrl, onClose, nftAttributes, n
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div ref={modalRef} className="flex flex-col bg-gray-200 text-black dark:bg-gray-800 dark:text-white p-10 rounded-3xl relative xl:max-w-[80%] lg:max-w-[80%] md:max-w-[80%] w-[70%] max-h-[80%] overflow-auto">
+      <div ref={modalRef} className="flex flex-col bg-gray-100 text-black dark:bg-gray-800 dark:text-white p-10 rounded-3xl relative xl:max-w-[80%] lg:max-w-[80%] md:max-w-[80%] w-[70%] max-h-[80%] overflow-auto">
 
         <div className='flex'>
           <h3 className="text-2xl font-bold mb-4">{nftName}</h3>
@@ -40,13 +40,13 @@ const NftModal: React.FC<NftModalProps> = ({ imageUrl, onClose, nftAttributes, n
         </div>
 
         <div className='flex flex-col items-center xl:items-start lg:items-start xl:flex-row lg:flex-row gap-12'>
-          <img src={imageUrl} alt="NFT" className="xl:w-[32rem] mb-4 object-cover lg:w-[24rem] w-[24rem]" />
+          <img src={imageUrl} alt="NFT" className="xl:w-[32rem] object-cover lg:w-[24rem] w-[24rem]" />
 
           <div>
             <h4 className="text-lg font-bold mb-2">Attributes:</h4>
             <ul className="grid grid-cols-3 gap-4">
               {Object.entries(nftAttributes).map(([key, value]) => (
-                <li key={key} className='dark:bg-gray-700 p-3 mb-2 rounded-lg'>
+                <li key={key} className='dark:bg-gray-700 bg-gray-200 p-3 mb-2 rounded-lg'>
                   <div className="flex justify-start items-start flex-col">
                     <span className="text-sm font-semibold mr-2">{key}:</span>
                     <span className='text-xs'>{value}</span>
