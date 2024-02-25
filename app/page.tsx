@@ -20,21 +20,20 @@ export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [walletAddress, setWalletAddress] = useState<string>('');
   const [walletAdded, setWalletAdded] = useState(false);
-  const [balance, setBalance] = useState<number | null>(null);
-  const [tokenBalances, setTokenBalances] = useState<any[] | null>(null);
-  const [nftList, setNftList] = useState<any[]>([]);
-  const [compressedNftList, setCompressedNftList] = useState<any[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [buttonClicked, setButtonClicked] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalImageUrl, setModalImageUrl] = useState('');
+  const [solPrice, setSolPrice] = useState<number | null>(null);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [solBalanceInUsdc, setSolBalanceInUsdc] = useState<number | null>(null);
+  const [tokenBalances, setTokenBalances] = useState<any[] | null>(null);
+  const [usdcPrices, setUsdcPrices] = useState<{ [key: string]: number }>({});
+  const [nftList, setNftList] = useState<any[]>([]);
   const [nftAttributes, setNftAttributes] = useState<{ [key: string]: string }>({});
   const [nftName, setNftName] = useState<string>('');
-  const [solPrice, setSolPrice] = useState<number | null>(null);
-  const [solBalanceInUsdc, setSolBalanceInUsdc] = useState<number | null>(null);
-  const [usdcPrices, setUsdcPrices] = useState<{ [key: string]: number }>({});
   const [collectionFloorPrices, setCollectionFloorPrices] = useState<{ [key: string]: number }>({});
-
+  const [compressedNftList, setCompressedNftList] = useState<any[] | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalImageUrl, setModalImageUrl] = useState('');
 
   useEffect(() => {
     document.body.className = isDarkMode ? 'dark' : '';
@@ -59,8 +58,7 @@ export default function Home() {
     setNftAttributes(attributesObject);
     setNftName(nftName);
     setIsModalOpen(true);
-};
-
+  };
 
     // Function to fetch SOL price
     const fetchSolPrice = async () => {
@@ -113,8 +111,8 @@ export default function Home() {
         wallet: walletAddress,
       });
 
-  // Function to fetch NFTs from Magic Eden API and floor prices
-  const fetchNFTsAndFloorPrices = async () => {
+    // Function to fetch NFTs from Magic Eden API and floor prices
+    const fetchNFTsAndFloorPrices = async () => {
     try {
       // Fetch NFTs
       const nftResponse = await axios.get(`https://api-mainnet.magiceden.dev/v2/wallets/${walletAddress}/tokens`);
@@ -138,11 +136,6 @@ export default function Home() {
     }
   };
 
-  // Call the fetchNFTsAndFloorPrices function when walletAddress is not empty
-  if (walletAddress) {
-    fetchNFTsAndFloorPrices();
-  }
-
       // Fetch cNFTs
       const compressedNftList = await shyft.nft.compressed.readAll({
         walletAddress: walletAddress,
@@ -151,8 +144,7 @@ export default function Home() {
       setBalance(solBalance);
       setTokenBalances(tokenBalances);
       setCompressedNftList(compressedNftList);
-
-      console.log('cNFTS', compressedNftList);
+      fetchNFTsAndFloorPrices();
 
       // Fetch USDC prices for each token
       const usdcPricesData: { [key: string]: number } = {};
@@ -181,34 +173,51 @@ export default function Home() {
     }
   };
 
-  // Calculate portfolio value in USD (SOL + tokens)
-  const calculateTotalTokenValue = () => {
-    if (!tokenBalances) return 0;
-  
-    return tokenBalances.reduce((totalValue, token) => {
-      const tokenUsdcPrice = usdcPrices[token.address];
-      if (tokenUsdcPrice !== undefined) {
-        totalValue += token.balance * tokenUsdcPrice;
-      }
-      return totalValue;
-    }, 0);
-  };
-
-  // Function to calculate the total price of NFTs
-  const calculateTotalNftPrice = () => {
-    if (!nftList || nftList.length === 0 || !collectionFloorPrices) return 0;
+  // Calculate the total price of NFTs in USD
+  const calculateTotalNftPriceInUsd = () => {
+    if (!nftList || nftList.length === 0 || !collectionFloorPrices || solPrice === null) return 0;
 
     let totalPrice = 0;
 
     nftList.forEach(nft => {
-      const collectionPrice = collectionFloorPrices[nft.collection] || 0;
-      totalPrice += collectionPrice;
+      const collectionPriceInSol = collectionFloorPrices[nft.collection] || 0;
+      totalPrice += collectionPriceInSol * solPrice;
     });
 
     return totalPrice;
   };
-  
-  
+
+  // Calculate total tokens value
+  const calculateTotalTokenValue = () => {
+    if (!tokenBalances) return 0;
+    let totalValue = 0;
+
+    tokenBalances.forEach((token) => {
+      const tokenUsdcPrice = usdcPrices[token.address];
+      if (tokenUsdcPrice !== undefined) {
+        totalValue += token.balance * tokenUsdcPrice;
+      }
+    });
+
+    return totalValue;
+  };
+
+  // Calculate portfolio value in USD (SOL + tokens + NFTs)
+  const calculateTotalValue = () => {
+    if (!tokenBalances) return 0;
+    let totalValue = 0;
+
+    tokenBalances.forEach((token) => {
+      const tokenUsdcPrice = usdcPrices[token.address];
+      if (tokenUsdcPrice !== undefined) {
+        totalValue += token.balance * tokenUsdcPrice;
+      }
+    });
+
+    totalValue += calculateTotalNftPriceInUsd();
+    return totalValue;
+  };
+    
   useEffect(() => {
     if (buttonClicked) {
       handleAddWallet();
@@ -250,15 +259,6 @@ export default function Home() {
       <div className='flex flex-col items-center mb-10 dark:text-white relative'>
         <div className='flex flex-row mb-3'>
           <h2 className='text-xl font-medium mb-2'>Total value</h2>
-          <div className='relative group'>
-          <span className='cursor-default text-[6px] dark:text-gray-400 tooltip-trigger ml-1 inline-flex items-center justify-center rounded-full border border-gray-700 dark:border-dark-300 w-3 h-3'>
-            i
-          </span>
-          <div className={`absolute left-1/2 transform -translate-x-40 -translate-y-14 xl:translate-x-2 xl:-translate-y-12 lg:translate-x-2 lg:-translate-y-12 md:translate-x-2 md:-translate-y-12 dark:text-gray-300 dark:bg-gray-800 bg-gray-300 text-black text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 tooltip whitespace-nowrap`}>
-            Only tracks Jupiter supported tokens
-          </div>
-
-          </div>
         </div>
         {buttonClicked && isLoading ? (
           <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
@@ -266,28 +266,70 @@ export default function Home() {
           <div className='flex flex-row items-center justify-start gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
             <div className='flex flex-col'>
               <p className='text-4xl font-bold'>
-                {`$${((solBalanceInUsdc !== null ? solBalanceInUsdc : 0) + calculateTotalTokenValue()).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
+                {`$${((solBalanceInUsdc !== null ? solBalanceInUsdc : 0) + calculateTotalValue()).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
               </p>
             </div>
           </div>
         )}
       </div>
 
-      {/* NFTs Floor Prices */}
+      {/* Assets values */}
       {walletAdded && (
-        <div className='flex flex-col items-center mb-10 dark:text-white'>
-          <h2 className='text-xl font-medium mb-2'>NFTs Floor Prices: </h2>
-          {buttonClicked && isLoading ? (
-          <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
-          ) : (
-          <div className='flex flex-row items-center justify-start gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
-            <div className='flex flex-col'>
-              <p className='text-base'>
-                {`${calculateTotalNftPrice().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SOL`}
-              </p>
+        <div className='flex flex-col'>
+          <h2 className='text-xl font-medium mb-2'>Assets value: </h2>
+          <div className='flex flex-row justify-center items-center mb-10 dark:text-white gap-10'>
+            <div>
+              <div className='relative group flex flex-row'>
+              <h2 className='text-xl font-medium mb-2'>NFTs</h2>
+                <span className='cursor-default text-[6px] dark:text-gray-400 tooltip-trigger ml-1 inline-flex items-center justify-center rounded-full border border-gray-700 dark:border-dark-300 w-3 h-3'>
+                  i
+                </span>
+                <div className={`absolute left-1/2 transform -translate-x-40 -translate-y-14 xl:translate-x-2 xl:-translate-y-12 lg:translate-x-2 lg:-translate-y-12 md:translate-x-2 md:-translate-y-12 dark:text-gray-300 dark:bg-gray-800 bg-gray-300 text-black text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 tooltip whitespace-nowrap`}>
+                  Only tracks Magic Eden supported NFTs
+                </div>
+              </div>
+              {buttonClicked && isLoading ? (
+                <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
+                ) : (
+                <div className='flex flex-col items-start gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
+                  <p className='text-base'>
+                    {`$${calculateTotalNftPriceInUsd().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  </p>
+                  {solPrice !== null && calculateTotalNftPriceInUsd() !== 0 && (
+                    <p className='text-base'>
+                      {`${(calculateTotalNftPriceInUsd() / solPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SOL`}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <div className='relative group flex flex-row'>
+              <h2 className='text-xl font-medium mb-2'>Tokens</h2>
+                <span className='cursor-default text-[6px] dark:text-gray-400 tooltip-trigger ml-1 inline-flex items-center justify-center rounded-full border border-gray-700 dark:border-dark-300 w-3 h-3'>
+                  i
+                </span>
+                <div className={`absolute left-1/2 transform -translate-x-40 -translate-y-14 xl:translate-x-2 xl:-translate-y-12 lg:translate-x-2 lg:-translate-y-12 md:translate-x-2 md:-translate-y-12 dark:text-gray-300 dark:bg-gray-800 bg-gray-300 text-black text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 tooltip whitespace-nowrap`}>
+                  Only tracks Jupiter supported tokens
+                </div>
+              </div>
+              {buttonClicked && isLoading ? (
+                <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
+              ) : (
+                <div className='flex flex-col items-start gap-3 bg-gray-200 dark:bg-gray-900 p-5 rounded-2xl'>
+                  <p className='text-base'>
+                    {`$${calculateTotalTokenValue().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  </p>
+                  {solPrice !== null && calculateTotalTokenValue() !== 0 && (
+                    <p className='text-base'>
+                      {`${(calculateTotalTokenValue() / solPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SOL`}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-          )}
         </div>
       )}
 
