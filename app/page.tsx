@@ -425,31 +425,48 @@ export default function Home() {
           </div>
         )}
 
-        {/* NFTs BALANCE */}
-        {walletAdded && (
-          <div className={`dark:text-white max-w-screen-lg items-start mb-10`}>
-            <h2 className='text-xl font-medium mb-4'>NFTs:</h2>
-            {buttonClicked && isLoading ? (
-              <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
-            ) : (
-              <ul className='flex flex-wrap gap-4 justify-start'>
-                {nftList && nftList.map((nft, index) => (
-                  <li key={index} className="flex flex-col items-center mb-4">
-                    {nft.image && (
-                      <img
-                        src={nft.image}
-                        alt={nft.name}
-                        className='w-40 mb-3 cursor-pointer hover:opacity-75'
-                        onClick={() => openModal(nft.properties.files[0].uri, nft.attributes, nft.name)}
-                      />
-                    )}
-                    <h4 className='text-sm text-gray-700 dark:text-gray-400'>{nft.name}</h4>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
+      {/* NFTs BALANCE */}
+      {walletAdded && (
+        <div className={`dark:text-white max-w-screen-lg items-start mb-10`}>
+          <h2 className='text-xl font-medium mb-4'>NFTs:</h2>
+          {buttonClicked && isLoading ? (
+            <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
+          ) : (
+            <div>
+              {/* Sort collection names alphabetically */}
+              {Object.entries(nftList.reduce((acc, nft) => {
+                if (!acc[nft.collectionName]) {
+                  acc[nft.collectionName] = [];
+                }
+                acc[nft.collectionName].push(nft);
+                return acc;
+              }, {}))
+              .sort(([collectionNameA], [collectionNameB]) => collectionNameA.localeCompare(collectionNameB)) // Sort collection names alphabetically
+              .map(([collectionName, nfts], index) => (
+                <div key={index} className='mb-14'>
+                  <h3 className="text-lg font-semibold mb-5">{collectionName}</h3>
+                  <ul className='flex flex-wrap gap-4 justify-start'>
+                    {(nfts as any[]).sort((nftA, nftB) => nftA.name.localeCompare(nftB.name)).map((nft: any, index: number) => ( // Sort NFTs alphabetically within each collection
+                      <li key={index} className="flex flex-col items-center mb-4">
+                        {nft.image && (
+                          <img
+                            src={nft.image}
+                            alt={nft.name}
+                            className='w-40 mb-3 cursor-pointer hover:opacity-75'
+                            onClick={() => openModal(nft.properties.files[0].uri, nft.attributes, nft.name)}
+                          />
+                        )}
+                        <h4 className='text-sm text-gray-700 dark:text-gray-400'>{nft.name}</h4>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
 
       {/* cNFTs BALANCE */}
       {walletAdded && (
