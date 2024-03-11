@@ -34,7 +34,7 @@ export default function Home() {
   const [compressedNftList, setCompressedNftList] = useState<any[] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageUrl, setModalImageUrl] = useState('');
-  const [isCNFTsCollapsed, setIsCNFTsCollapsed] = useState(true);
+  const [selectedSection, setSelectedSection] = useState('tokens');
 
 
   useEffect(() => {
@@ -43,6 +43,10 @@ export default function Home() {
 
   const toggleDarkMode = () => {
     setIsDarkMode((prevMode) => !prevMode);
+  };
+
+  const handleSectionChange = (section: any) => {
+    setSelectedSection(section);
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,7 +140,6 @@ export default function Home() {
       for (const collectionSymbol of collectionSymbols) {
         const response = await axios.get(`https://api-mainnet.magiceden.dev/v2/collections/${collectionSymbol}/stats`);
         const floorPrice = response.data.floorPrice / Math.pow(10, 9);
-        console.log(`Floor price for ${collectionSymbol}:`, floorPrice);
         floorPrices[collectionSymbol] = floorPrice;
       }
 
@@ -235,7 +238,8 @@ export default function Home() {
   }, [buttonClicked]);
 
   return (
-    <div className={`dark:bg-black dark:bg-opacity-95 bg-slate-100 flex flex-col flex-wrap items-center min-h-screen min-w-screen pt-28 pb-20 duration-500 ${isDarkMode ? 'dark' : ''}`}>
+    <>
+    <div className={`dark:bg-black dark:bg-opacity-95 bg-slate-100 flex flex-col flex-wrap items-center min-h-screen min-w-screen pt-28 pb-12 duration-500 ${isDarkMode ? 'dark' : ''}`}>
       <div className="flex justify-between w-full p-4">
 
       <div className='flex flex-row gap-2 absolute top-0 left-0 m-5 dark:text-white'>
@@ -288,17 +292,17 @@ export default function Home() {
       {walletAdded && (
         <div className='flex flex-col items-center w-9/12'>
           <h2 className='text-xl font-medium mb-7 dark:text-white'>Assets value</h2>
-          <div className='flex flex-row justify-center items-center mb-10 dark:text-white gap-10'>
+          <div className='flex flex-row justify-center items-center min-w-full mb-10 dark:text-white gap-10'>
 
           {/* SOL */}
           <div>
             <div className='relative group flex flex-row items-center justify-center'>
-              <h2 className='text-lg font-medium mb-2'>SOL balance</h2>
+              <h2 className='text-lg font-medium mb-2'>SOL</h2>
               </div>
               {buttonClicked && <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />}
             {balance !== null && !buttonClicked ? (
-            <div className='flex flex-col items-center justify-center gap-3 bg-white dark:bg-gray-900 border border-opacity-20 border-gray-400 dark:border-gray-800 p-5 rounded-2xl'>
-                <p className='text-lg font-bold'>{solBalanceInUsdc !== null ? `$${solBalanceInUsdc.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A'}</p>
+            <div className='flex flex-col items-center justify-center gap-2 bg-white dark:bg-gray-900 border border-opacity-20 border-gray-400 dark:border-gray-800 p-5 rounded-2xl'>
+                <p className='text-xl font-bold'>{solBalanceInUsdc !== null ? `$${solBalanceInUsdc.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A'}</p>
                 <p className='text-sm text-gray-700 dark:text-gray-400'>{`${balance.toFixed(4)} SOL`}</p>
             </div>
             ) : null}
@@ -363,13 +367,31 @@ export default function Home() {
       )}
 
       <div className='flex flex-col items-center xl:items-start lg:items-start md:items-start w-9/12'>
+
+
+      <div className="flex mb-20 mt-10 min-w-full justify-around">
+        <div className={`flex justify-center text-2xl dark:text-white w-[33%] pb-6 ${selectedSection === 'tokens' ? 'border-b-2 border-gray-700' : 'border-none'}`}>
+          <button onClick={() => handleSectionChange('tokens')}>
+            Tokens
+          </button>
+        </div>
+        <div className={`flex justify-center text-2xl dark:text-white w-[33%] pb-6 ${selectedSection === 'nfts' ? 'border-b-2 border-gray-700' : 'border-none'}`}>
+          <button onClick={() => handleSectionChange('nfts')}>
+            NFTs
+          </button>
+        </div>
+        <div className={`flex justify-center text-2xl dark:text-white w-[33%] pb-6 ${selectedSection === 'cnfts' ? 'border-b-2 border-gray-700' : 'border-none'}`}>
+          <button onClick={() => handleSectionChange('cnfts')}>
+            cNFTs
+          </button>
+        </div>
+      </div>
         
         {/* TOKENS BALANCE */}
 
-        {walletAdded && (
+        {walletAdded && selectedSection === 'tokens' &&(
           <div className='mb-10 dark:text-white'>
             <div className='mb-5'>
-              <h2 className='text-xl font-medium mb-4'>Tokens:</h2>
               {balance !== null && !buttonClicked ? (
               <div className='flex flex-row items-center justify-between gap-3 bg-white dark:bg-gray-900 border border-opacity-20 border-gray-400 dark:border-gray-800 p-5 rounded-2xl'>
                 <div className='flex flex-row gap-3'>
@@ -384,9 +406,6 @@ export default function Home() {
               ) : null}
             </div>
 
-            {buttonClicked && isLoading ? (
-              <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
-            ) : (
               <ul className='flex flex-col gap-5'>
                 {/* Render tokens with USD values first */}
                 {tokenBalances && tokenBalances
@@ -421,17 +440,12 @@ export default function Home() {
                     </li>
                   ))}
               </ul>
-            )}
           </div>
         )}
 
       {/* NFTs BALANCE */}
-      {walletAdded && (
+      {walletAdded && selectedSection === 'nfts' && (
         <div className={`dark:text-white max-w-screen-lg items-start mb-10`}>
-          <h2 className='text-xl font-medium mb-4'>NFTs:</h2>
-          {buttonClicked && isLoading ? (
-            <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
-          ) : (
             <div>
               {/* Sort collection names alphabetically */}
               {Object.entries(nftList.reduce((acc, nft) => {
@@ -463,41 +477,27 @@ export default function Home() {
                 </div>
               ))}
             </div>
-          )}
         </div>
       )}
 
-
       {/* cNFTs BALANCE */}
-      {walletAdded && (
+      {walletAdded && selectedSection === 'cnfts' && (
         <div className={`dark:text-white max-w-screen-lg items-start mb-10`}>
-          <h2 className='text-xl font-medium mb-4'>cNFTs:</h2>
-          {buttonClicked && isLoading ? (
-            <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
-          ) : (
-            <>
-              <button onClick={() => setIsCNFTsCollapsed(!isCNFTsCollapsed)} className='mb-5'>
-                {isCNFTsCollapsed ? 'Show' : 'Hide'} cNFTs
-              </button>
-              {!isCNFTsCollapsed && (
-                <ul className='flex flex-wrap gap-4 justify-start'>
-                  {compressedNftList && compressedNftList.map((cNFT, index) => (
-                    <li key={index} className="flex flex-col items-center mb-4">
-                      {cNFT.cached_image_uri && (
-                        <img
-                          src={cNFT.cached_image_uri}
-                          alt={cNFT.name}
-                          className='w-40 mb-3 cursor-pointer hover:opacity-75'
-                          onClick={() => openModal(cNFT.cached_image_uri, cNFT.attributes, cNFT.name)}
-                        />
-                      )}
-                      <h4 className='text-sm text-gray-700 dark:text-gray-400'>{cNFT.name}</h4>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </>
-          )}
+          <ul className='flex flex-wrap gap-4 justify-start'>
+            {compressedNftList && compressedNftList.map((cNFT, index) => (
+              <li key={index} className="flex flex-col items-center mb-4">
+                {cNFT.cached_image_uri && (
+                  <img
+                    src={cNFT.cached_image_uri}
+                    alt={cNFT.name}
+                    className='w-40 mb-3 cursor-pointer hover:opacity-75'
+                    onClick={() => openModal(cNFT.cached_image_uri, cNFT.attributes, cNFT.name)}
+                  />
+                )}
+                <h4 className='text-sm text-gray-700 dark:text-gray-400'>{cNFT.name}</h4>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
@@ -513,5 +513,9 @@ export default function Home() {
         />
       )}
     </div>
+    <div className={`w-full dark:bg-black dark:bg-opacity-95 bg-slate-100 dark:text-gray-300 text-xs pb-4 flex flex-row items-center justify-center min-w-screen duration-500 ${isDarkMode ? 'dark' : ''}`}>
+      <p>by: <a href='https://github.com/ondrejvosmera'>ondrejvosmera</a></p>
+    </div>
+    </>
   );
 }
