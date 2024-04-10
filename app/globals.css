@@ -3,7 +3,7 @@
 @import "tailwindcss/utilities";
 
 :root {
-  --foreground-rgb: 255, 255, 255;
+  --foreground-rgb: 0, 0, 0;
   --text-color: 0, 0, 0;
 }
 
@@ -26,4 +26,5 @@ body {
   font-family: 'Space Grotesk', sans-serif;
   color: rgb(var(--text-color));
   background: rgb(var(--foreground-rgb));
+  min-height: 100vh;
 }

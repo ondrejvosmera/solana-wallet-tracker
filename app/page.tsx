@@ -125,29 +125,36 @@ export default function Home() {
         wallet: walletAddress,
       });
 
-    // Function to fetch NFTs from Magic Eden API and floor prices
-    const fetchNFTsAndFloorPrices = async () => {
-    try {
-      // Fetch NFTs
-      const nftResponse = await axios.get(`https://api-mainnet.magiceden.dev/v2/wallets/${walletAddress}/tokens`);
-      const nftData: { collection: string }[] = nftResponse.data;
-      setNftList(nftData);
+   // Outside your component
+type FloorPricesMap = { [key: string]: number };
 
-      // Fetch floor prices
-      const collectionSymbols: string[] = Array.from(new Set(nftData.map((nft) => nft.collection)));
-      const floorPrices: Record<string, number> = {};
-
-      for (const collectionSymbol of collectionSymbols) {
-        const response = await axios.get(`https://api-mainnet.magiceden.dev/v2/collections/${collectionSymbol}/stats`);
-        const floorPrice = response.data.floorPrice / Math.pow(10, 9);
-        floorPrices[collectionSymbol] = floorPrice;
-      }
-
-      setCollectionFloorPrices(floorPrices);
-    } catch (error) {
-      console.error('Error fetching NFTs and/or floor prices:', error);
+// Inside your component
+const fetchNFTsAndFloorPrices = async () => {
+  try {
+    const response = await fetch(`/api/magiceden?walletAddress=${walletAddress}`);
+    
+    // Check if the response is OK before parsing the JSON
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
     }
-  };
+
+    const { nfts, floorPrices } = await response.json();
+
+    // Use a state setter function for `setCollectionFloorPrices`
+    setCollectionFloorPrices((prevFloorPrices) => {
+      const floorPricesMap = floorPrices.reduce((acc: FloorPricesMap, item: { collection: string; floorPrice: number }) => {
+        acc[item.collection] = item.floorPrice;
+        return acc;
+      }, {});
+      return { ...prevFloorPrices, ...floorPricesMap };
+    });
+
+    // Set the NFTs list
+    setNftList(nfts);
+  } catch (error) {
+    console.error('Error fetching NFTs and/or floor prices:', error);
+  }
+};
 
       // Fetch cNFTs
       const compressedNftList = await shyft.nft.compressed.readAll({
@@ -272,7 +279,7 @@ export default function Home() {
      {/* TOTAL VALUE */}
      <div className='flex flex-col items-center mb-10 dark:text-white relative'>
         <div className='flex flex-row mb-3'>
-          <h2 className='text-xl font-medium mb-2'>Total value</h2>
+          <h2 className='text-2xl font-bold mb-2'>Total value</h2>
         </div>
         {buttonClicked && isLoading ? (
           <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
@@ -291,11 +298,11 @@ export default function Home() {
       {/* Assets values */}
       {walletAdded && (
         <div className='flex flex-col items-center w-9/12'>
-          <h2 className='text-xl font-medium mb-7 dark:text-white'>Assets value</h2>
-          <div className='flex flex-row justify-center items-center min-w-full mb-10 dark:text-white gap-10'>
+          <h2 className='text-2xl font-bold mb-7 dark:text-white'>Assets value</h2>
+          <div className='flex flex-row gap-10 justify-center items-center min-w-full mb-10 dark:text-white'>
 
           {/* SOL */}
-          <div>
+          <div className='flex flex-col items-center justify-center min-w-[12%]'>
             <div className='relative group flex flex-row items-center justify-center'>
               <h2 className='text-lg font-medium mb-2'>SOL</h2>
               </div>
@@ -309,7 +316,7 @@ export default function Home() {
             </div>
 
             {/* TOKENS */}
-            <div>
+            <div className='flex flex-col items-center justify-center min-w-[12%]'>
               <div className='relative group flex flex-row items-center justify-center'>
               <h2 className='text-lg font-medium mb-2'>Tokens</h2>
                 <span className='cursor-default text-[6px] dark:text-gray-400 tooltip-trigger ml-1 inline-flex items-center justify-center rounded-full border border-gray-700 dark:border-dark-300 w-3 h-3'>
@@ -336,7 +343,7 @@ export default function Home() {
             </div>
 
             {/* NFTS */}
-            <div>
+            <div className='flex flex-col items-center justify-center min-w-[12%]'>
               <div className='relative group flex flex-row items-center justify-center'>
               <h2 className='text-lg font-medium mb-2'>NFTs</h2>
                 <span className='cursor-default text-[6px] dark:text-gray-400 tooltip-trigger ml-1 inline-flex items-center justify-center rounded-full border border-gray-700 dark:border-dark-300 w-3 h-3'>
@@ -470,7 +477,7 @@ export default function Home() {
                             onClick={() => openModal(nft.properties.files[0].uri, nft.attributes, nft.name)}
                           />
                         )}
-                        <h4 className='text-sm text-gray-700 dark:text-gray-400'>{nft.name}</h4>
+                        <h4 className='text-xs text-gray-700 dark:text-gray-400'>{nft.name}</h4>
                       </li>
                     ))}
                   </ul>
@@ -494,13 +501,12 @@ export default function Home() {
                     onClick={() => openModal(cNFT.cached_image_uri, cNFT.attributes, cNFT.name)}
                   />
                 )}
-                <h4 className='text-sm text-gray-700 dark:text-gray-400'>{cNFT.name}</h4>
+                <h4 className='text-xs text-gray-700 dark:text-gray-400'>{cNFT.name}</h4>
               </li>
             ))}
           </ul>
         </div>
       )}
-
 
       </div>
       {/* Render the modal if it's open */}
