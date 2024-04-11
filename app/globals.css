@@ -5,6 +5,7 @@
 :root {
   --foreground-rgb: 0, 0, 0;
   --text-color: 0, 0, 0;
+  --secondary-color: #001326;
 }
 
 @media (prefers-color-scheme: dark) {

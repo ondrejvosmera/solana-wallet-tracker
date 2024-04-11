@@ -4,9 +4,10 @@ import { MdOutlineLightMode } from "react-icons/md";
 import { MdOutlineDarkMode } from "react-icons/md";
 import { ShyftSdk, Network } from '@shyft-to/js';
 import ReactLoading from 'react-loading';
-import NftModal from './nftModal';
+import NftModal from './components/nftModal';
 import Image from 'next/image';
 import solanaLogo from './solana-logo.png';
+import DonutChart from './components/donutChart';
 
 // Ad4CgpXJnyFAfamceJdr4sB6H7DSQpqfsRGasKNYJf6H
 // DwFoTKCevYoga35cEe75dseG5dbxwZd7dvZrmhKhSrDD
@@ -14,7 +15,6 @@ import solanaLogo from './solana-logo.png';
 // 86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdaMpo2MMY (toly's wallet)
 
 const shyft = new ShyftSdk({ apiKey: 'q4uEPvIuyvnxwm2U', network: Network.Mainnet });
-const axios = require('axios');
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -125,36 +125,35 @@ export default function Home() {
         wallet: walletAddress,
       });
 
-   // Outside your component
-type FloorPricesMap = { [key: string]: number };
 
-// Inside your component
-const fetchNFTsAndFloorPrices = async () => {
-  try {
-    const response = await fetch(`/api/magiceden?walletAddress=${walletAddress}`);
-    
-    // Check if the response is OK before parsing the JSON
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
+    type FloorPricesMap = { [key: string]: number };
 
-    const { nfts, floorPrices } = await response.json();
+    const fetchNFTsAndFloorPrices = async () => {
+      try {
+        const response = await fetch(`/api/magiceden?walletAddress=${walletAddress}`);
+        
+        // Check if the response is OK before parsing the JSON
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
 
-    // Use a state setter function for `setCollectionFloorPrices`
-    setCollectionFloorPrices((prevFloorPrices) => {
-      const floorPricesMap = floorPrices.reduce((acc: FloorPricesMap, item: { collection: string; floorPrice: number }) => {
-        acc[item.collection] = item.floorPrice;
-        return acc;
-      }, {});
-      return { ...prevFloorPrices, ...floorPricesMap };
-    });
+        const { nfts, floorPrices } = await response.json();
 
-    // Set the NFTs list
-    setNftList(nfts);
-  } catch (error) {
-    console.error('Error fetching NFTs and/or floor prices:', error);
-  }
-};
+        // Use a state setter function for `setCollectionFloorPrices`
+        setCollectionFloorPrices((prevFloorPrices) => {
+          const floorPricesMap = floorPrices.reduce((acc: FloorPricesMap, item: { collection: string; floorPrice: number }) => {
+            acc[item.collection] = item.floorPrice;
+            return acc;
+          }, {});
+          return { ...prevFloorPrices, ...floorPricesMap };
+        });
+
+        // Set the NFTs list
+        setNftList(nfts);
+      } catch (error) {
+        console.error('Error fetching NFTs and/or floor prices:', error);
+      }
+    };
 
       // Fetch cNFTs
       const compressedNftList = await shyft.nft.compressed.readAll({
@@ -246,32 +245,36 @@ const fetchNFTsAndFloorPrices = async () => {
 
   return (
     <>
-    <div className={`dark:bg-black dark:bg-opacity-95 bg-slate-100 flex flex-col flex-wrap items-center min-h-screen min-w-screen pt-28 pb-12 duration-500 ${isDarkMode ? 'dark' : ''}`}>
-      <div className="flex justify-between w-full p-4">
+    <div className={`dark:bg-[#000A12] bg-slate-100 flex flex-col flex-wrap items-center min-h-screen min-w-screen pt-28 pb-12 duration-500 ${isDarkMode ? 'dark' : ''}`}>
+      <div className="fixed top-0 left-0 right-0 z-50 pb-7 bg-slate-100 bg-opacity-90 dark:bg-[#000A12] dark:bg-opacity-90 backdrop-filter backdrop-blur-md border-b border-opacity-80 border-gray-500 dark:border-gray-900">
+        <div className="flex justify-between w-full p-4">
 
-      <div className='flex flex-row gap-2 absolute top-0 left-0 m-5 dark:text-white'>
-        <h2 className='text-base font-medium mb-4'>SOL price:</h2>
-        {solPrice !== null ? (
-          <span className='font-bold text-base'>${solPrice.toFixed(2)}</span>
-        ) : (
-          <span>Loading...</span>
-        )}
+        <div className='flex flex-row gap-2 absolute top-0 left-0 m-5 dark:text-white'>
+          <h2 className='text-base font-medium mb-4'>SOL price:</h2>
+          {solPrice !== null ? (
+            <span className='font-bold text-base'>${solPrice.toFixed(2)}</span>
+          ) : (
+            <span>Loading...</span>
+          )}
+        </div>
+
+          <button onClick={toggleDarkMode} className='absolute top-0 right-0 mt-3 mr-5 p-[10px] rounded-full hover:bg-gray-300 bg-white dark:bg-[color:var(--secondary-color)] border dark:border-opacity-50 border-black dark:border-gray-600 dark:hover:bg-gray-800 duration-200'>
+            {isDarkMode ? <MdOutlineLightMode className='text-white' /> : <MdOutlineDarkMode />}
+          </button>
+        </div>
       </div>
 
-        <button onClick={toggleDarkMode} className='absolute top-0 right-0 m-5 p-3 rounded-full hover:bg-gray-300 bg-white dark:bg-gray-900 border border-opacity-20 border-gray-400 dark:border-gray-800 dark:hover:bg-gray-800 duration-200'>
-          {isDarkMode ? <MdOutlineLightMode className='text-white' /> : <MdOutlineDarkMode />}
-        </button>
-      </div>
+
       <h1 className="xl:text-6xl lg:text-6xl md:text-6xl text-4xl mb-16 font-semibold dark:text-white">Solana wallet tracker</h1>
       <div className='flex flex-col xl:flex-row lg:flex-row md:flex-row gap-3 justify-center items-center mb-10 w-9/12'>
         <input
           type="text"
           placeholder="Wallet address"
-          className='outline-none w-[20rem] xl:w-[26rem] lg:w-[26rem] md:w-[26rem] rounded-xl p-3 pr-4 pl-4 bg-white dark:bg-gray-900 border border-opacity-20 border-gray-400 dark:border-gray-800 dark:text-white'
+          className='outline-none w-[20rem] xl:w-[26rem] lg:w-[26rem] md:w-[26rem] rounded-xl p-3 pr-4 pl-4 bg-white dark:bg-[color:var(--secondary-color)] border dark:border-opacity-50 border-black dark:border-gray-600 dark:text-white'
           value={walletAddress}
           onChange={handleInputChange}
         />
-        <button onClick={() => setButtonClicked(true)} className='p-3 pr-4 pl-4 rounded-xl bg-white dark:bg-gray-900 border border-opacity-20 border-gray-400 dark:text-white dark:border-gray-800 dark:hover:bg-gray-800 duration-200'>
+        <button onClick={() => setButtonClicked(true)} className='p-3 pr-4 pl-4 rounded-xl bg-black dark:bg-white dark:text-black text-white duration-200'>
           Add wallet
         </button>
       </div>
@@ -284,7 +287,7 @@ const fetchNFTsAndFloorPrices = async () => {
         {buttonClicked && isLoading ? (
           <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
         ) : (
-          <div className='flex flex-row items-center justify-start gap-3 p-5 rounded-2xl bg-white dark:bg-gray-900 border border-opacity-20 border-gray-400 dark:border-gray-800'>
+          <div className='flex flex-row items-center justify-start gap-3 p-5 rounded-2xl bg-white dark:bg-[color:var(--secondary-color)] border dark:border-opacity-50 border-black dark:border-gray-600'>
             <div className='flex flex-col'>
               <p className='text-4xl font-bold'>
                 {`$${((solBalanceInUsdc !== null ? solBalanceInUsdc : 0) + calculateTotalValue()).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
@@ -308,7 +311,7 @@ const fetchNFTsAndFloorPrices = async () => {
               </div>
               {buttonClicked && <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />}
             {balance !== null && !buttonClicked ? (
-            <div className='flex flex-col items-center justify-center gap-2 bg-white dark:bg-gray-900 border border-opacity-20 border-gray-400 dark:border-gray-800 p-5 rounded-2xl'>
+            <div className='flex flex-col items-center justify-center gap-2 bg-white dark:bg-[color:var(--secondary-color)] border dark:border-opacity-50 border-black dark:border-gray-600 p-5 rounded-2xl'>
                 <p className='text-xl font-bold'>{solBalanceInUsdc !== null ? `$${solBalanceInUsdc.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A'}</p>
                 <p className='text-sm text-gray-700 dark:text-gray-400'>{`${balance.toFixed(4)} SOL`}</p>
             </div>
@@ -322,14 +325,14 @@ const fetchNFTsAndFloorPrices = async () => {
                 <span className='cursor-default text-[6px] dark:text-gray-400 tooltip-trigger ml-1 inline-flex items-center justify-center rounded-full border border-gray-700 dark:border-dark-300 w-3 h-3'>
                   i
                 </span>
-                <div className={`absolute left-1/2 transform -translate-x-40 -translate-y-14 xl:translate-x-5 xl:-translate-y-8 lg:translate-x-2 lg:-translate-y-12 md:translate-x-2 md:-translate-y-12 dark:text-gray-300 dark:bg-gray-900 bg-white text-black text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 tooltip whitespace-nowrap`}>
+                <div className={`absolute left-1/2 transform -translate-x-40 -translate-y-14 xl:translate-x-5 xl:-translate-y-8 lg:translate-x-2 lg:-translate-y-12 md:translate-x-2 md:-translate-y-12 dark:text-gray-300 dark:bg-[color:var(--secondary-color)] bg-white text-black text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 tooltip whitespace-nowrap`}>
                   Only tracks Jupiter supported tokens
                 </div>
               </div>
               {buttonClicked && isLoading ? (
                 <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
               ) : (
-                <div className='flex flex-col items-center justify-center gap-2 bg-white dark:bg-gray-900 border border-opacity-20 border-gray-400 dark:border-gray-800 p-5 rounded-2xl'>
+                <div className='flex flex-col items-center justify-center gap-2 bg-white dark:bg-[color:var(--secondary-color)] border dark:border-opacity-50 border-black dark:border-gray-600 p-5 rounded-2xl'>
                   <p className='text-xl font-bold'>
                     {`$${calculateTotalTokenValue().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </p>
@@ -349,14 +352,14 @@ const fetchNFTsAndFloorPrices = async () => {
                 <span className='cursor-default text-[6px] dark:text-gray-400 tooltip-trigger ml-1 inline-flex items-center justify-center rounded-full border border-gray-700 dark:border-dark-300 w-3 h-3'>
                   i
                 </span>
-                <div className={`absolute left-1/2 transform -translate-x-40 -translate-y-14 xl:translate-x-5 xl:-translate-y-8 lg:translate-x-2 lg:-translate-y-12 md:translate-x-2 md:-translate-y-12 dark:text-gray-300 dark:bg-gray-900 bg-white text-black text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 tooltip whitespace-nowrap`}>
+                <div className={`absolute left-1/2 transform -translate-x-40 -translate-y-14 xl:translate-x-5 xl:-translate-y-8 lg:translate-x-2 lg:-translate-y-12 md:translate-x-2 md:-translate-y-12 dark:text-gray-300 dark:bg-[color:var(--secondary-color)] bg-white text-black text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 tooltip whitespace-nowrap`}>
                   Only tracks Magic Eden supported NFTs
                 </div>
               </div>
               {buttonClicked && isLoading ? (
                 <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
                 ) : (
-                <div className='flex flex-col items-center justify-center gap-2 bg-white dark:bg-gray-900 border border-opacity-20 border-gray-400 dark:border-gray-800 p-5 rounded-2xl'>
+                <div className='flex flex-col items-center justify-center gap-2 bg-white dark:bg-[color:var(--secondary-color)] border dark:border-opacity-50 border-black dark:border-gray-600 p-5 rounded-2xl'>
                   <p className='text-xl font-bold'>
                     {`$${calculateTotalNftPriceInUsd().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </p>
@@ -372,6 +375,17 @@ const fetchNFTsAndFloorPrices = async () => {
           </div>
         </div>
       )}
+
+      {walletAdded && (
+        <DonutChart
+          solBalanceInUsdc={solBalanceInUsdc}
+          calculateTotalTokenValue={calculateTotalTokenValue}
+          calculateTotalNftPriceInUsd={calculateTotalNftPriceInUsd}
+          isDarkMode={isDarkMode}
+        />
+      )}
+
+
 
       <div className='flex flex-col items-center xl:items-start lg:items-start md:items-start w-9/12'>
 
@@ -400,7 +414,7 @@ const fetchNFTsAndFloorPrices = async () => {
           <div className='mb-10 dark:text-white'>
             <div className='mb-5'>
               {balance !== null && !buttonClicked ? (
-              <div className='flex flex-row items-center justify-between gap-3 bg-white dark:bg-gray-900 border border-opacity-20 border-gray-400 dark:border-gray-800 p-5 rounded-2xl'>
+              <div className='flex flex-row items-center justify-between gap-3 bg-white dark:bg-[color:var(--secondary-color)] border dark:border-opacity-50 border-black dark:border-gray-600 p-5 rounded-2xl'>
                 <div className='flex flex-row gap-3'>
                   <Image src={solanaLogo} alt='solana-logo' className='w-10 h-10 rounded-full'/>
                   <div className='flex flex-col'>
@@ -421,7 +435,7 @@ const fetchNFTsAndFloorPrices = async () => {
                     const totalValue = (token.balance * usdcPrices[token.address]).toFixed(2);
 
                     return (
-                      <li key={index} className='flex flex-row items-center justify-between bg-white dark:bg-gray-900 border border-opacity-20 border-gray-400 dark:border-gray-800 p-5 rounded-2xl'>
+                      <li key={index} className='flex flex-row items-center justify-between bg-white dark:bg-[color:var(--secondary-color)] border dark:border-opacity-50 border-black dark:border-gray-600 p-5 rounded-2xl'>
                         <div className='flex flex-row gap-3'>
                           <img src={token.info.image} alt={token.name} className='w-10 h-10 rounded-full'/>
                           <div className='flex flex-col'>
@@ -438,7 +452,7 @@ const fetchNFTsAndFloorPrices = async () => {
                 {tokenBalances && tokenBalances
                   .filter((token) => token.balance !== 0 && usdcPrices[token.address] === undefined)
                   .map((token, index) => (
-                    <li key={index} className='flex flex-row gap-3 bg-white dark:bg-gray-900 border border-opacity-20 border-gray-400 dark:border-gray-800 p-5 rounded-2xl'>
+                    <li key={index} className='flex flex-row gap-3 bg-white dark:bg-[color:var(--secondary-color)] border dark:border-opacity-50 border-black dark:border-gray-600 p-5 rounded-2xl'>
                       <img src={token.info.image} alt={token.name} className='w-10 h-10 rounded-full'/>
                       <div className='flex flex-col'>
                         <p className='text-base'>{token.info.name}</p>
