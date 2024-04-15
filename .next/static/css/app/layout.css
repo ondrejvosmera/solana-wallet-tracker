@@ -842,6 +842,9 @@ video {
 .gap-5 {
   gap: 1.25rem;
 }
+.gap-20 {
+  gap: 5rem;
+}
 .overflow-auto {
   overflow: auto;
 }
@@ -889,10 +892,6 @@ video {
 .border-gray-700 {
   --tw-border-opacity: 1;
   border-color: rgb(55 65 81 / var(--tw-border-opacity));
-}
-.border-white {
-  --tw-border-opacity: 1;
-  border-color: rgb(255 255 255 / var(--tw-border-opacity));
 }
 .border-opacity-80 {
   --tw-border-opacity: 0.8;
@@ -957,6 +956,12 @@ video {
 }
 .pt-28 {
   padding-top: 7rem;
+}
+.pt-32 {
+  padding-top: 8rem;
+}
+.pt-40 {
+  padding-top: 10rem;
 }
 .text-2xl {
   font-size: 1.5rem;

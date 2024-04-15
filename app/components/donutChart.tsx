@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import DonutChart from 'react-donut-chart';
 
-// Updated interface with types for the functions
 interface CustomDonutChartProps {
   solBalanceInUsdc: number | null;
   calculateTotalTokenValue: () => number;
@@ -15,15 +14,18 @@ const CustomDonutChart: React.FC<CustomDonutChartProps> = ({
   calculateTotalNftPriceInUsd,
   isDarkMode
 }) => {
-  const chartRef = useRef<HTMLDivElement>(null); // Specifying the type for useRef
+  const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const textElements = chartRef.current?.querySelectorAll('svg text');
     textElements?.forEach((text) => {
         const svgTextElement = text as SVGTextElement;
-        svgTextElement.style.fill = isDarkMode ? '#FFFFFF' : '#000000'; // Change text color based on theme
+        svgTextElement.style.fill = isDarkMode ? '#FFFFFF' : '#000000';
     });
-}, [isDarkMode]);
+  }, [isDarkMode]);
+
+
+  const formatValue = (value: number) => parseFloat(value.toFixed(2));
 
   return (
     <div ref={chartRef}>
@@ -31,19 +33,23 @@ const CustomDonutChart: React.FC<CustomDonutChartProps> = ({
         data={[
           {
             label: 'SOL',
-            value: solBalanceInUsdc ? solBalanceInUsdc : 0,
+            value: formatValue(solBalanceInUsdc ? solBalanceInUsdc : 0),
           },
           {
             label: 'Tokens',
-            value: calculateTotalTokenValue(),
+            value: formatValue(calculateTotalTokenValue()),
           },
           {
             label: 'NFTs',
-            value: calculateTotalNftPriceInUsd(),
+            value: formatValue(calculateTotalNftPriceInUsd()),
           },
         ]}
-        width={550}
-        height={400}
+        width={450}
+        height={300}
+        colors={['#03E1FF','#00FFA3', '#DC1FFF']}
+        strokeColor='#000'
+        clickToggle={false}
+        selectedOffset={0.01}
       />
     </div>
   );

@@ -245,7 +245,7 @@ export default function Home() {
 
   return (
     <>
-    <div className={`dark:bg-[#000A12] bg-slate-100 flex flex-col flex-wrap items-center min-h-screen min-w-screen pt-28 pb-12 duration-500 ${isDarkMode ? 'dark' : ''}`}>
+    <div className={`dark:bg-[#000A12] bg-slate-100 flex flex-col flex-wrap items-center min-h-screen min-w-screen pt-40 pb-12 duration-500 ${isDarkMode ? 'dark' : ''}`}>
       <div className="fixed top-0 left-0 right-0 z-50 pb-7 bg-slate-100 bg-opacity-90 dark:bg-[#000A12] dark:bg-opacity-90 backdrop-filter backdrop-blur-md border-b border-opacity-80 border-gray-500 dark:border-gray-900">
         <div className="flex justify-between w-full p-4">
 
@@ -279,31 +279,30 @@ export default function Home() {
         </button>
       </div>
 
-     {/* TOTAL VALUE */}
-     <div className='flex flex-col items-center mb-10 dark:text-white relative'>
-        <div className='flex flex-row mb-3'>
-          <h2 className='text-2xl font-bold mb-2'>Total value</h2>
-        </div>
-        {buttonClicked && isLoading ? (
-          <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
-        ) : (
-          <div className='flex flex-row items-center justify-start gap-3 p-5 rounded-2xl bg-white dark:bg-[color:var(--secondary-color)] border dark:border-opacity-50 border-black dark:border-gray-600'>
-            <div className='flex flex-col'>
-              <p className='text-4xl font-bold'>
-                {`$${((solBalanceInUsdc !== null ? solBalanceInUsdc : 0) + calculateTotalValue()).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-
-
-      {/* Assets values */}
+      {/* ASSETS VALUES */}      
       {walletAdded && (
-        <div className='flex flex-col items-center w-9/12'>
-          <h2 className='text-2xl font-bold mb-7 dark:text-white'>Assets value</h2>
-          <div className='flex flex-row gap-10 justify-center items-center min-w-full mb-10 dark:text-white'>
+        <div className='flex flex-row items-center gap-20'>
+          <div className='flex flex-col gap-10 justify-center items-center mb-10 dark:text-white'>
 
+          {/* TOTAL VALUE */}
+          <div className='flex flex-col items-center dark:text-white relative'>
+                  <div className='flex flex-row mb-3'>
+                    <h2 className='text-2xl font-bold mb-2'>Total value</h2>
+                  </div>
+                  {buttonClicked && isLoading ? (
+                    <ReactLoading type="spinningBubbles" color={isDarkMode ? 'white' : 'black'} height={'35px'} width={'35px'} />
+                  ) : (
+                    <div className='flex flex-row items-center justify-start gap-3 p-5 rounded-2xl bg-white dark:bg-[color:var(--secondary-color)] border dark:border-opacity-50 border-black dark:border-gray-600'>
+                      <div className='flex flex-col'>
+                        <p className='text-4xl font-bold'>
+                          {`$${((solBalanceInUsdc !== null ? solBalanceInUsdc : 0) + calculateTotalValue()).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+          
+          <div className='flex flex-row gap-10 justify-start items-start min-w-full mb-10 dark:text-white'>
           {/* SOL */}
           <div className='flex flex-col items-center justify-center min-w-[12%]'>
             <div className='relative group flex flex-row items-center justify-center'>
@@ -371,22 +370,20 @@ export default function Home() {
                 </div>
               )}
             </div>
-
+          </div>
+          </div>
+          <div>
+          <DonutChart
+              solBalanceInUsdc={solBalanceInUsdc}
+              calculateTotalTokenValue={calculateTotalTokenValue}
+              calculateTotalNftPriceInUsd={calculateTotalNftPriceInUsd}
+              isDarkMode={isDarkMode}
+            />
           </div>
         </div>
       )}
 
-      {walletAdded && (
-        <DonutChart
-          solBalanceInUsdc={solBalanceInUsdc}
-          calculateTotalTokenValue={calculateTotalTokenValue}
-          calculateTotalNftPriceInUsd={calculateTotalNftPriceInUsd}
-          isDarkMode={isDarkMode}
-        />
-      )}
-
-
-
+  {walletAdded && (        
       <div className='flex flex-col items-center xl:items-start lg:items-start md:items-start w-9/12'>
 
 
@@ -523,6 +520,8 @@ export default function Home() {
       )}
 
       </div>
+      )}
+
       {/* Render the modal if it's open */}
       {isModalOpen && (
         <NftModal
