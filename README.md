@@ -1,4 +1,6 @@
 # 🛠️ BUILDING...
 
+## NOT WORKING RIGHT NOW, FIXES COMING SOON...
+
 ### 🖥️ Live demo of the page: [SOLANA-WALLET-TRACKER](https://solana-wallet-tracker-ondrejvosmera.vercel.app/)
 
